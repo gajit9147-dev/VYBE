@@ -63,24 +63,24 @@ model User {
   profile                 Profile?
   discoveryPreferences    DiscoveryPreference?
   compatibilityAnswers    CompatibilityAnswer[]
-  interactionsGiven       ProfileInteraction[]    @relation("ActorInteractions")
-  interactionsReceived    ProfileInteraction[]    @relation("TargetInteractions")
-  matchesAsUser1          Match[]                 @relation("User1Matches")
-  matchesAsUser2          Match[]                 @relation("User2Matches")
-  matchesClosed           Match[]                 @relation("ClosedMatches")
-  conversationsAsUser1    Conversation[]          @relation("User1Conversations")
-  conversationsAsUser2    Conversation[]          @relation("User2Conversations")
+  interactionsGiven       ProfileInteraction[]     @relation("ActorInteractions")
+  interactionsReceived    ProfileInteraction[]     @relation("TargetInteractions")
+  matchesAsUser1          Match[]                  @relation("User1Matches")
+  matchesAsUser2          Match[]                  @relation("User2Matches")
+  matchesClosed           Match[]                  @relation("ClosedMatches")
+  conversationsAsUser1    Conversation[]           @relation("User1Conversations")
+  conversationsAsUser2    Conversation[]           @relation("User2Conversations")
   messagesSent            Message[]
   notifications           Notification[]
   locationPrivacySettings LocationPrivacySetting?
   locationEvents          LocationEvent[]
-  crossedPathsAsUser1     CrossedPath[]           @relation("User1CrossedPaths")
-  crossedPathsAsUser2     CrossedPath[]           @relation("User2CrossedPaths")
+  crossedPathsAsUser1     CrossedPath[]            @relation("User1CrossedPaths")
+  crossedPathsAsUser2     CrossedPath[]            @relation("User2CrossedPaths")
   liveLocationShares      LiveLocationShare[]
-  blocksGiven             UserBlock[]             @relation("BlockerBlocks")
-  blocksReceived          UserBlock[]             @relation("BlockedBlocks")
-  reportsFiled            UserReport[]            @relation("ReporterReports")
-  reportsReceived         UserReport[]            @relation("ReportedReports")
+  blocksGiven             UserBlock[]              @relation("BlockerBlocks")
+  blocksReceived          UserBlock[]              @relation("BlockedBlocks")
+  reportsFiled            UserReport[]             @relation("ReporterReports")
+  reportsReceived         UserReport[]             @relation("ReportedReports")
   moderationCases         ModerationCase[]
   moderationActions       ModerationAction[]
   verifications           UserVerification[]
@@ -90,6 +90,7 @@ model User {
   emergencyEvents         EmergencyEvent[]
   subscriptions           UserSubscription[]
   paymentTransactions     PaymentTransaction[]
+  emailVerificationTokens EmailVerificationToken[]
 
   @@index([status])
   @@index([deletedAt])
@@ -142,6 +143,20 @@ model TwoFactorAuth {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("two_factor_auth")
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash") @db.VarChar(64)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("email_verification_tokens")
 }
 
 // -----------------------------------------------------------------------------

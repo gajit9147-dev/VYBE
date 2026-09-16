@@ -133,6 +133,74 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Email Verification",
+      "item": [
+        {
+          "name": "1. Send Verification Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/email-verification/send",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "email-verification", "send"]
+            },
+            "description": "Generates 32-byte secure token hash, enforces 60s cooldown and IP rate limiting, and dispatches verification email."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Verify Email Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/email-verification/verify?token=SAMPLE_TOKEN_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "email-verification", "verify"],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "SAMPLE_TOKEN_HERE"
+                }
+              ]
+            },
+            "description": "Validates single-use token hash and marks account as email-verified."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Verification Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/email-verification/status?email={{testEmail}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "email-verification", "status"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "{{testEmail}}"
+                }
+              ]
+            },
+            "description": "Retrieves the verification status (isVerified, verifiedAt) for an account."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

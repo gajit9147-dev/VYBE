@@ -49,3 +49,24 @@ export const authenticate: RequestHandler = async (req: Request, _res: Response,
     next(error);
   }
 };
+
+export const optionalAuthenticate: RequestHandler = async (req: Request, _res: Response, next: NextFunction) => {
+  try {
+    const token = extractSessionToken(req);
+    if (!token) {
+      return next();
+    }
+
+    const auth = await verifySession(token);
+    if (auth) {
+      req.user = auth.user;
+      req.sessionId = auth.sessionId;
+      req.sessionToken = token;
+    }
+
+    next();
+  } catch {
+    next();
+  }
+};
+
