@@ -9,6 +9,7 @@ import { logger } from "./config/logger.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { healthRouter } from "./routes/health.routes.js";
+import { profileRouter } from "./routes/profile.routes.js";
 
 export const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.json({ limit: "1mb" }));
 
 app.use("/health", healthRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/profile", profileRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

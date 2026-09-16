@@ -3,6 +3,7 @@ import { after, before, beforeEach, describe, it } from "node:test";
 import request from "supertest";
 import { app } from "../app.js";
 import { disconnectDatabase, prisma } from "../config/db.js";
+import { logger } from "../config/logger.js";
 import { disconnectRedis } from "../config/redis.js";
 import { resetRateLimitStore } from "../middleware/rate-limiter.js";
 import { resetPhoneRateLimits } from "../services/phone-rate-limiter.service.js";
@@ -410,5 +411,61 @@ describe("VYBE Phone Number Verification API", () => {
 
     assert.equal(rateLimitedRes.status, 429);
     assert.ok(rateLimitedRes.body.error.message.includes("Too many"));
+  });
+
+  it("18. raw OTP is never emitted to application logs during send or verify operations", async () => {
+    const loggedChunks: string[] = [];
+    const origInfo = logger.info.bind(logger);
+    const origWarn = logger.warn.bind(logger);
+    const origError = logger.error.bind(logger);
+
+    const recordLog = (originalFn: Function) => (...args: any[]) => {
+      try {
+        loggedChunks.push(JSON.stringify(args));
+      } catch {
+        loggedChunks.push(String(args));
+      }
+      return originalFn(...args);
+    };
+
+    logger.info = recordLog(origInfo) as any;
+    logger.warn = recordLog(origWarn) as any;
+    logger.error = recordLog(origError) as any;
+
+    const testPhone = "+14155558899";
+
+    try {
+      const sendRes = await request(app)
+        .post("/api/auth/phone/send-otp")
+        .set("Cookie", userACookie)
+        .send({ phoneNumber: testPhone });
+
+      assert.equal(sendRes.status, 200);
+
+      const latestMsg = inMemorySms.getLastMessage();
+      assert.ok(latestMsg);
+      const rawOtp = latestMsg.message.match(/(\d{6})/)![1];
+
+      // Perform verification attempt
+      const verifyRes = await request(app)
+        .post("/api/auth/phone/verify-otp")
+        .set("Cookie", userACookie)
+        .send({ phoneNumber: testPhone, otp: rawOtp });
+
+      assert.equal(verifyRes.status, 200);
+
+      // Verify that the 6-digit raw OTP NEVER appeared in any logger output
+      for (const logText of loggedChunks) {
+        assert.equal(
+          logText.includes(rawOtp),
+          false,
+          `Raw OTP "${rawOtp}" leaked into application logs: ${logText}`
+        );
+      }
+    } finally {
+      logger.info = origInfo;
+      logger.warn = origWarn;
+      logger.error = origError;
+    }
   });
 });

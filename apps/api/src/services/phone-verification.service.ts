@@ -113,7 +113,7 @@ export async function sendOtp(params: {
 
   const now = new Date();
 
-  // Invalidate any existing unconsumed tokens for this user
+  // Invalidate any existing unconsumed tokens for this user in DB
   await prisma.phoneVerificationToken.updateMany({
     where: {
       userId,
@@ -123,6 +123,18 @@ export async function sendOtp(params: {
       usedAt: now
     }
   });
+
+  const phoneKeyHash = hashPhoneNumber(normalizedPhone);
+  const redisOtpKey = `otp:pending:${userId}:${phoneKeyHash}`;
+
+  // Invalidate prior Redis temporary OTP state if present
+  if (isRedisConnected()) {
+    try {
+      await redis.del(redisOtpKey);
+    } catch {
+      // Redis cleanup fallback
+    }
+  }
 
   // Generate cryptographically secure 6-digit numeric OTP
   const rawOtp = generateNumericOtp();
@@ -141,6 +153,25 @@ export async function sendOtp(params: {
       expiresAt
     }
   });
+
+  // Store protected OTP representation temporarily in Redis with exact TTL
+  if (isRedisConnected()) {
+    try {
+      await redis.set(
+        redisOtpKey,
+        JSON.stringify({
+          otpHash,
+          attempts: 0,
+          maxAttempts: env.PHONE_OTP_MAX_ATTEMPTS,
+          expiresAt: expiresAt.toISOString()
+        }),
+        "EX",
+        env.PHONE_OTP_TTL_MINUTES * 60
+      );
+    } catch {
+      // Redis is safe cache/temporary state layer; fallback seamlessly to PostgreSQL
+    }
+  }
 
   // Dispatch via SMS provider abstraction (provider never logs raw OTP)
   await smsProvider.sendSms({
@@ -227,6 +258,28 @@ export async function verifyOtp(params: {
       }
     });
 
+    if (isRedisConnected()) {
+      try {
+        const phoneKeyHash = hashPhoneNumber(normalizedPhone);
+        const redisOtpKey = `otp:pending:${userId}:${phoneKeyHash}`;
+        if (isExceeded) {
+          await redis.del(redisOtpKey);
+        } else {
+          const cached = await redis.get(redisOtpKey);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            parsed.attempts = updatedAttempts;
+            const remainingTtl = await redis.ttl(redisOtpKey);
+            if (remainingTtl > 0) {
+              await redis.set(redisOtpKey, JSON.stringify(parsed), "EX", remainingTtl);
+            }
+          }
+        }
+      } catch {
+        // Redis fallback
+      }
+    }
+
     if (isExceeded) {
       throw new AppError("Maximum verification attempts exceeded. Please request a new code.", 400);
     }
@@ -249,6 +302,14 @@ export async function verifyOtp(params: {
       where: { id: tokenRecord.id },
       data: { usedAt: now }
     });
+    if (isRedisConnected()) {
+      try {
+        const phoneKeyHash = hashPhoneNumber(normalizedPhone);
+        await redis.del(`otp:pending:${userId}:${phoneKeyHash}`);
+      } catch {
+        // Redis fallback
+      }
+    }
     throw new AppError("This phone number is already verified with another account.", 409);
   }
 
@@ -283,6 +344,16 @@ export async function verifyOtp(params: {
       }
     });
   });
+
+  // Clean up Redis temporary OTP state upon successful verification
+  if (isRedisConnected()) {
+    try {
+      const phoneKeyHash = hashPhoneNumber(normalizedPhone);
+      await redis.del(`otp:pending:${userId}:${phoneKeyHash}`);
+    } catch {
+      // Redis cleanup fallback
+    }
+  }
 
   return {
     message: "Phone number verified successfully.",
@@ -375,6 +446,15 @@ export async function removePhone(params: {
       }
     });
   });
+
+  if (isRedisConnected() && user.phoneNumber) {
+    try {
+      const phoneKeyHash = hashPhoneNumber(user.phoneNumber);
+      await redis.del(`otp:pending:${userId}:${phoneKeyHash}`);
+    } catch {
+      // Redis cleanup fallback
+    }
+  }
 
   return {
     message: "Phone number removed successfully.",
