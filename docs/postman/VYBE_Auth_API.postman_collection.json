@@ -201,6 +201,94 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Phone Verification",
+      "item": [
+        {
+          "name": "1. Send Phone OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phoneNumber\": \"+14155552671\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/phone/send-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "phone", "send-otp"]
+            },
+            "description": "Normalizes phone to E.164, rate-limits across phone, IP, and user, invalidates previous OTP, and dispatches single-use code."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Verify Phone OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phoneNumber\": \"+14155552671\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/phone/verify-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "phone", "verify-otp"]
+            },
+            "description": "Validates single-use 6-digit OTP, checks expiration (5 min) and max attempts (5), and marks phone as verified."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Phone Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/phone/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "phone", "status"]
+            },
+            "description": "Returns privacy-masked phone verification status (never reveals full phone number)."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Remove Phone Number",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{testPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/phone/remove",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "phone", "remove"]
+            },
+            "description": "Requires password re-authentication via Argon2id. Removes phone number and invalidates all active tokens."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

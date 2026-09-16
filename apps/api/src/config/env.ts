@@ -16,7 +16,17 @@ const environmentSchema = z.object({
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().optional(),
   SMTP_USER: z.string().optional(),
-  SMTP_PASS: z.string().optional()
+  SMTP_PASS: z.string().optional(),
+  REDIS_HOST: z.string().default("127.0.0.1"),
+  REDIS_PORT: z.coerce.number().int().min(1).max(65535).default(6379),
+  REDIS_PASSWORD: z.string().optional(),
+  PHONE_OTP_TTL_MINUTES: z.coerce.number().int().min(1).max(30).default(5),
+  PHONE_OTP_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(10).default(5),
+  PHONE_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().min(10).max(300).default(60),
+  SMS_PROVIDER: z.enum(["memory", "twilio"]).default("memory"),
+  TWILIO_ACCOUNT_SID: z.string().optional(),
+  TWILIO_AUTH_TOKEN: z.string().optional(),
+  TWILIO_FROM_NUMBER: z.string().optional()
 });
 
 const parsedEnvironment = environmentSchema.safeParse(process.env);

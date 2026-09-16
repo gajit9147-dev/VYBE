@@ -11,6 +11,7 @@ import { createRateLimiter } from "../middleware/rate-limiter.js";
 import { validateBody } from "../middleware/validate.js";
 import { loginSchema, registerSchema } from "../schemas/auth.schema.js";
 import { emailVerificationRouter } from "./email-verification.routes.js";
+import { phoneVerificationRouter } from "./phone-verification.routes.js";
 
 export const authRouter = Router();
 
@@ -30,3 +31,6 @@ authRouter.get("/me", authenticate, handleGetMe);
 
 // Email verification sub-router: /api/auth/email-verification/*
 authRouter.use("/email-verification", emailVerificationRouter);
+
+// Phone verification sub-router: /api/auth/phone/*
+authRouter.use("/phone", phoneVerificationRouter);

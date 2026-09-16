@@ -2,6 +2,7 @@ import { prisma } from "../config/db.js";
 import { type LoginInput, type RegisterInput } from "../schemas/auth.schema.js";
 import { AppError } from "../utils/app-error.js";
 import { hashPassword, verifyPassword } from "../utils/password.js";
+import { maskPhoneNumber } from "../utils/phone.js";
 import {
   generateSessionToken,
   getSessionExpiryDate,
@@ -47,7 +48,7 @@ function toSafeUser(user: {
   return {
     id: user.id,
     email: user.email,
-    phoneNumber: user.phoneNumber,
+    phoneNumber: maskPhoneNumber(user.phoneNumber),
     role: user.role,
     status: user.status,
     isVerified: user.isVerified,

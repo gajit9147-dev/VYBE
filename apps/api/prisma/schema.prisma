@@ -91,6 +91,7 @@ model User {
   subscriptions           UserSubscription[]
   paymentTransactions     PaymentTransaction[]
   emailVerificationTokens EmailVerificationToken[]
+  phoneVerificationTokens PhoneVerificationToken[]
 
   @@index([status])
   @@index([deletedAt])
@@ -157,6 +158,24 @@ model EmailVerificationToken {
 
   @@index([userId, expiresAt])
   @@map("email_verification_tokens")
+}
+
+model PhoneVerificationToken {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  phoneNumber String    @map("phone_number") @db.VarChar(20)
+  otpHash     String    @map("otp_hash") @db.VarChar(64)
+  attempts    Int       @default(0) @db.SmallInt
+  maxAttempts Int       @default(5) @map("max_attempts") @db.SmallInt
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt      DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([phoneNumber, expiresAt])
+  @@map("phone_verification_tokens")
 }
 
 // -----------------------------------------------------------------------------
