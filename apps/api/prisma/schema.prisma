@@ -566,6 +566,10 @@ enum DiscoveryEventType {
   OPEN_PROFILE
   REPORT
   BLOCK
+  LIKE
+  PASS
+  UNLIKE
+  UNPASS
   OTHER
 }
 
@@ -711,16 +715,26 @@ enum TargetElementType {
   PROFILE
 }
 
+enum InteractionReasonType {
+  SHARED_INTEREST
+  SHARED_ANSWER
+  RELATIONSHIP_INTENT
+  PROFILE_PROMPT
+  OTHER
+}
+
 model ProfileInteraction {
-  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  actorUserId       String             @map("actor_user_id") @db.Uuid
-  targetUserId      String             @map("target_user_id") @db.Uuid
+  id                String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actorUserId       String                 @map("actor_user_id") @db.Uuid
+  targetUserId      String                 @map("target_user_id") @db.Uuid
   action            InteractionAction
-  targetElementType TargetElementType? @map("target_element_type")
-  targetElementId   String?            @map("target_element_id") @db.Uuid
-  comment           String?            @db.Text
-  isConsumedByMatch Boolean            @default(false) @map("is_consumed_by_match")
-  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  targetElementType TargetElementType?     @map("target_element_type")
+  targetElementId   String?                @map("target_element_id") @db.Uuid
+  reasonType        InteractionReasonType? @map("reason_type")
+  comment           String?                @db.Text
+  isConsumedByMatch Boolean                @default(false) @map("is_consumed_by_match")
+  createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime               @updatedAt @default(now()) @map("updated_at") @db.Timestamptz(6)
 
   actor  User @relation("ActorInteractions", fields: [actorUserId], references: [id], onDelete: Cascade)
   target User @relation("TargetInteractions", fields: [targetUserId], references: [id], onDelete: Cascade)

@@ -57,6 +57,14 @@ export async function getDiscoveryExclusions(userId: string): Promise<Set<string
 
   for (const s of recentSkips) excluded.add(s.candidateUserId);
 
+  // 4. Candidates already acted upon (LIKE or PASS)
+  const existingInteractions = await prisma.profileInteraction.findMany({
+    where: { actorUserId: userId },
+    select: { targetUserId: true }
+  });
+
+  for (const i of existingInteractions) excluded.add(i.targetUserId);
+
   return excluded;
 }
 
@@ -455,4 +463,131 @@ export async function recordDiscoveryEvent(userId: string, input: CreateDiscover
     success: true,
     eventId: event.id
   };
+}
+
+export async function canInteractWithCandidate(actorUserId: string, candidateId: string) {
+  if (actorUserId === candidateId) {
+    throw new AppError("Cannot interact with yourself", 400);
+  }
+
+  // Check blocks in both directions
+  const isBlocked = await prisma.userBlock.findFirst({
+    where: {
+      OR: [
+        { blockerUserId: actorUserId, blockedUserId: candidateId },
+        { blockerUserId: candidateId, blockedUserId: actorUserId }
+      ]
+    }
+  });
+
+  if (isBlocked) {
+    throw new AppError("That profile is not available for this action", 404);
+  }
+
+  // Check reports in both directions (pending, in_review, actioned)
+  const isReported = await prisma.userReport.findFirst({
+    where: {
+      OR: [
+        { reporterUserId: actorUserId, reportedUserId: candidateId },
+        { reporterUserId: candidateId, reportedUserId: actorUserId }
+      ],
+      status: { not: "DISMISSED" }
+    }
+  });
+
+  if (isReported) {
+    throw new AppError("That profile is not available for this action", 404);
+  }
+
+  // Query candidate
+  const candidate = await prisma.user.findUnique({
+    where: { id: candidateId },
+    include: {
+      profile: {
+        include: {
+          interests: { include: { interest: true } },
+          relationshipIntents: { include: { intent: true } },
+          prompts: true
+        }
+      },
+      discoveryPreferences: true,
+      settings: true,
+      questionAnswers: {
+        where: { visibility: { in: ["PUBLIC", "DISCOVERY"] } },
+        include: { question: true }
+      }
+    }
+  });
+
+  if (
+    !candidate ||
+    candidate.deletedAt ||
+    candidate.status !== "ACTIVE" ||
+    !candidate.profile ||
+    !candidate.profile.isDiscoverable ||
+    candidate.profile.isIncognito ||
+    candidate.settings?.isDiscoveryPaused
+  ) {
+    throw new AppError("That profile is not available for this action", 404);
+  }
+
+  // Query actor
+  const actor = await prisma.user.findUnique({
+    where: { id: actorUserId },
+    include: {
+      profile: {
+        include: {
+          interests: { include: { interest: true } },
+          relationshipIntents: { include: { intent: true } },
+          prompts: true
+        }
+      },
+      discoveryPreferences: true,
+      questionAnswers: {
+        where: { visibility: { in: ["PUBLIC", "DISCOVERY"] } },
+        include: { question: true }
+      }
+    }
+  });
+
+  if (!actor || !actor.profile) {
+    throw new AppError("Please complete your profile first", 400);
+  }
+
+  const actorAge = calculateAge(actor.profile.birthDate);
+  const candidateAge = calculateAge(candidate.profile.birthDate);
+
+  // Check age preferences
+  const actorMinAge = actor.discoveryPreferences?.minAge ?? 18;
+  const actorMaxAge = actor.discoveryPreferences?.maxAge ?? 45;
+  if (candidateAge < actorMinAge || candidateAge > actorMaxAge) {
+    throw new AppError("That profile is not available for this action", 400);
+  }
+
+  if (candidate.discoveryPreferences?.isAgeDealbreaker) {
+    const cMin = candidate.discoveryPreferences.minAge;
+    const cMax = candidate.discoveryPreferences.maxAge;
+    if (actorAge < cMin || actorAge > cMax) {
+      throw new AppError("That profile is not available for this action", 400);
+    }
+  }
+
+  // Check gender preferences
+  const actorGenders = actor.discoveryPreferences?.interestedInGenders ?? [
+    "WOMAN",
+    "MAN",
+    "NON_BINARY"
+  ];
+  if (!actorGenders.includes(candidate.profile.gender)) {
+    throw new AppError("That profile is not available for this action", 400);
+  }
+
+  if (
+    candidate.discoveryPreferences?.interestedInGenders &&
+    !candidate.discoveryPreferences.interestedInGenders.includes(actor.profile.gender)
+  ) {
+    throw new AppError("That profile is not available for this action", 400);
+  }
+
+  return { actor, candidate };
 }

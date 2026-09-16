@@ -4,6 +4,13 @@ import {
   handleGetDiscoveryFeed,
   handleRecordDiscoveryEvent
 } from "../controllers/discovery.controller.js";
+import {
+  handleGetOwnAction,
+  handleLikeCandidate,
+  handlePassCandidate,
+  handleRemoveLike,
+  handleRemovePass
+} from "../controllers/interactions.controller.js";
 import { authenticate } from "../middleware/authenticate.js";
 import { createRateLimiter } from "../middleware/rate-limiter.js";
 
@@ -25,11 +32,26 @@ const discoveryEventLimiter = createRateLimiter({
   keyPrefix: "discovery_event"
 });
 
+// Rate limiter for likes and passes: 100 requests per 15 minutes per IP
+const interactionsLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Too many interaction attempts. Please slow down.",
+  keyPrefix: "discovery_interaction"
+});
+
 // GET /api/discovery - Candidate discovery feed with cursor pagination
 discoveryRouter.get("/", authenticate, discoveryFeedLimiter, handleGetDiscoveryFeed);
 
 // POST /api/discovery/events - Record telemetry on candidates (VIEW, SKIP, etc.)
 discoveryRouter.post("/events", authenticate, discoveryEventLimiter, handleRecordDiscoveryEvent);
+
+// Actions: Like, Pass, and Action State
+discoveryRouter.post("/:candidateId/like", authenticate, interactionsLimiter, handleLikeCandidate);
+discoveryRouter.delete("/:candidateId/like", authenticate, interactionsLimiter, handleRemoveLike);
+discoveryRouter.post("/:candidateId/pass", authenticate, interactionsLimiter, handlePassCandidate);
+discoveryRouter.delete("/:candidateId/pass", authenticate, interactionsLimiter, handleRemovePass);
+discoveryRouter.get("/:candidateId/action", authenticate, interactionsLimiter, handleGetOwnAction);
 
 // GET /api/discovery/:userId - Discovery-safe candidate profile with object-level authorization
 discoveryRouter.get("/:userId", authenticate, discoveryFeedLimiter, handleGetCandidateProfile);
