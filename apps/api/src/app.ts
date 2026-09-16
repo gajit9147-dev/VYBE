@@ -11,6 +11,7 @@ import { authRouter } from "./routes/auth.routes.js";
 import { discoveryRouter } from "./routes/discovery.routes.js";
 import { healthRouter } from "./routes/health.routes.js";
 import { interestsRouter } from "./routes/interests.routes.js";
+import { matchesRouter } from "./routes/matches.routes.js";
 import { profileRouter } from "./routes/profile.routes.js";
 import { questionsRouter } from "./routes/questions.routes.js";
 import { relationshipIntentsRouter } from "./routes/relationship-intents.routes.js";
@@ -31,6 +32,7 @@ app.use("/api/interests", interestsRouter);
 app.use("/api/relationship-intents", relationshipIntentsRouter);
 app.use("/api/questions", questionsRouter);
 app.use("/api/discovery", discoveryRouter);
+app.use("/api/matches", matchesRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

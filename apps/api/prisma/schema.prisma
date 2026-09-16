@@ -96,6 +96,7 @@ model User {
   questionAnswers         UserQuestionAnswer[]
   discoveryEventsGiven    DiscoveryEvent[]         @relation("UserDiscoveryEvents")
   discoveryEventsReceived DiscoveryEvent[]         @relation("CandidateDiscoveryEvents")
+  matchEventsGiven        MatchEvent[]             @relation("ActorMatchEvents")
 
   @@index([status])
   @@index([deletedAt])
@@ -756,6 +757,19 @@ enum MatchStatus {
   EXPIRED
 }
 
+enum MatchReasonType {
+  SHARED_INTEREST
+  SHARED_ANSWER
+  RELATIONSHIP_INTENT
+  PREFERENCE_ALIGNMENT
+  PROFILE_SIGNAL
+}
+
+enum MatchEventType {
+  MATCH_CREATED
+  MATCH_UNMATCHED
+}
+
 model Match {
   id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user1Id           String      @map("user1_id") @db.Uuid
@@ -772,7 +786,8 @@ model Match {
   user2    User  @relation("User2Matches", fields: [user2Id], references: [id], onDelete: Cascade)
   closedBy User? @relation("ClosedMatches", fields: [closedByUserId], references: [id], onDelete: SetNull)
 
-  matchReason  MatchReason?
+  reasons      MatchReason[]
+  events       MatchEvent[]
   conversation Conversation?
   datePlans    DatePlan[]
 
@@ -783,19 +798,35 @@ model Match {
 }
 
 model MatchReason {
-  id                      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matchId                 String   @unique @map("match_id") @db.Uuid
-  sharedIntentKey         String?  @map("shared_intent_key") @db.VarChar(32)
-  sharedInterestsCount    Int      @default(0) @map("shared_interests_count") @db.SmallInt
-  valuesAlignmentScore    Int      @default(0) @map("values_alignment_score") @db.SmallInt
-  lifestyleAlignmentScore Int      @default(0) @map("lifestyle_alignment_score") @db.SmallInt
-  explanationChips        String[] @default([]) @map("explanation_chips")
-  crossedPathsRecorded    Boolean  @default(false) @map("crossed_paths_recorded")
-  createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId   String          @map("match_id") @db.Uuid
+  type      MatchReasonType
+  text      String          @db.VarChar(255)
+  metadata  Json?           @db.JsonB
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
 
   match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
+  @@index([matchId])
+  @@index([type])
   @@map("match_reasons")
+}
+
+model MatchEvent {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId     String         @map("match_id") @db.Uuid
+  actorUserId String?        @map("actor_user_id") @db.Uuid
+  type        MatchEventType
+  metadata    Json?          @db.JsonB
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  actor User? @relation("ActorMatchEvents", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([matchId])
+  @@index([actorUserId])
+  @@index([createdAt(sort: Desc)])
+  @@map("match_events")
 }
 
 // -----------------------------------------------------------------------------

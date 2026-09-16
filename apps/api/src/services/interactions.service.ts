@@ -2,6 +2,7 @@ import { prisma } from "../config/db.js";
 import type { InteractionReasonType } from "../schemas/interactions.schema.js";
 import { AppError } from "../utils/app-error.js";
 import { canInteractWithCandidate } from "./discovery.service.js";
+import { generateMatchReasons } from "./match-reason.service.js";
 
 export async function recordLike(
   actorUserId: string,
@@ -43,6 +44,8 @@ export async function recordLike(
     }
   }
 
+  let createdMatchId: string | null = null;
+
   await prisma.$transaction(async (tx) => {
     await tx.profileInteraction.upsert({
       where: {
@@ -71,11 +74,82 @@ export async function recordLike(
         metadata: reasonType ? { reasonType } : undefined
       }
     });
+
+    // Check for reciprocal LIKE
+    const reciprocal = await tx.profileInteraction.findUnique({
+      where: {
+        actorUserId_targetUserId: {
+          actorUserId: candidateId,
+          targetUserId: actorUserId
+        }
+      }
+    });
+
+    if (reciprocal && reciprocal.action === "LIKE") {
+      // Deterministic user ordering: user1Id = min(A, B), user2Id = max(A, B)
+      const [user1Id, user2Id] =
+        actorUserId < candidateId ? [actorUserId, candidateId] : [candidateId, actorUserId];
+
+      // Check if Match already exists (ACTIVE or UNMATCHED)
+      const existingMatch = await tx.match.findUnique({
+        where: {
+          user1Id_user2Id: {
+            user1Id,
+            user2Id
+          }
+        }
+      });
+
+      if (!existingMatch) {
+        // Generate deterministic reasons based on real DB data
+        const reasons = generateMatchReasons(actor, candidate);
+
+        try {
+          const newMatch = await tx.match.create({
+            data: {
+              user1Id,
+              user2Id,
+              status: "ACTIVE",
+              reasons: {
+                create: reasons.map((r) => ({
+                  type: r.type,
+                  text: r.text,
+                  metadata: r.metadata ?? undefined
+                }))
+              },
+              events: {
+                create: {
+                  actorUserId,
+                  type: "MATCH_CREATED"
+                }
+              }
+            }
+          });
+
+          createdMatchId = newMatch.id;
+        } catch (err: any) {
+          // Handle concurrent reciprocal likes where both transactions attempt to create the match
+          if (err.code === "P2002") {
+            const found = await tx.match.findUnique({
+              where: { user1Id_user2Id: { user1Id, user2Id } }
+            });
+            if (found) {
+              createdMatchId = found.id;
+            }
+          } else {
+            throw err;
+          }
+        }
+      } else if (existingMatch.status === "ACTIVE") {
+        createdMatchId = existingMatch.id;
+      }
+    }
   });
 
   return {
     success: true,
-    liked: true
+    liked: true,
+    ...(createdMatchId ? { match: { id: createdMatchId, isMatch: true } } : {})
   };
 }
 
