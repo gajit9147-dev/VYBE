@@ -13,7 +13,8 @@ export const errorHandler: ErrorRequestHandler = (error, request, response, _nex
   request.log.error({ err: error, statusCode }, "Request failed");
   response.status(statusCode).json({
     error: {
-      message
+      message,
+      ...(error instanceof AppError && error.details !== undefined ? { details: error.details } : {})
     }
   });
 };
