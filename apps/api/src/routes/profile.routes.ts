@@ -14,6 +14,13 @@ import {
   handlePatchMe
 } from "../controllers/profile.controller.js";
 import {
+  handleCreateUserAnswer,
+  handleDeleteUserAnswer,
+  handleGetPublicUserAnswers,
+  handleListUserAnswers,
+  handleUpdateUserAnswer
+} from "../controllers/questions.controller.js";
+import {
   handleGetUserRelationshipIntents,
   handleSetUserRelationshipIntents
 } from "../controllers/relationship-intents.controller.js";
@@ -61,6 +68,15 @@ profileRouter.put("/relationship-intents", authenticate, handleSetUserRelationsh
 // Discovery preferences endpoints
 profileRouter.get("/preferences", authenticate, handleGetUserPreferences);
 profileRouter.put("/preferences", authenticate, handleUpdateUserPreferences);
+
+// User Question Answers endpoints
+profileRouter.get("/answers", authenticate, handleListUserAnswers);
+profileRouter.post("/answers", authenticate, handleCreateUserAnswer);
+profileRouter.patch("/answers/:answerId", authenticate, handleUpdateUserAnswer);
+profileRouter.delete("/answers/:answerId", authenticate, handleDeleteUserAnswer);
+
+// Public user answers endpoint
+profileRouter.get("/:id/answers", optionalAuthenticate, handleGetPublicUserAnswers);
 
 // GET /api/profile/:id - Public profile view (by UUID or username)
 // NOTE: Must be defined after all explicit sub-paths to prevent route shadowing

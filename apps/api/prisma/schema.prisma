@@ -93,6 +93,7 @@ model User {
   emailVerificationTokens EmailVerificationToken[]
   phoneVerificationTokens PhoneVerificationToken[]
   profileAuditLogs        ProfileAuditLog[]
+  questionAnswers         UserQuestionAnswer[]
 
   @@index([status])
   @@index([deletedAt])
@@ -603,6 +604,63 @@ model CompatibilityAnswer {
   @@index([userId, questionId])
   @@map("compatibility_answers")
 }
+
+// -----------------------------------------------------------------------------
+// Module 10B: Questions & Answers (Open-Ended Profile & Discovery Prompts)
+// -----------------------------------------------------------------------------
+
+enum QuestionCategory {
+  VALUES
+  LIFESTYLE
+  PERSONALITY
+  RELATIONSHIPS
+  FUN
+  DEEP
+  DAILY_LIFE
+}
+
+enum AnswerVisibility {
+  PUBLIC
+  DISCOVERY
+  MATCHES_ONLY
+  PRIVATE
+}
+
+model Question {
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  questionText String           @map("question_text") @db.Text
+  category     QuestionCategory
+  isActive     Boolean          @default(true) @map("is_active")
+  displayOrder Int              @default(0) @map("display_order") @db.SmallInt
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  answers UserQuestionAnswer[]
+
+  @@index([isActive, category, displayOrder])
+  @@map("questions")
+}
+
+model UserQuestionAnswer {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String           @map("user_id") @db.Uuid
+  questionId       String           @map("question_id") @db.Uuid
+  answer           String           @db.Text
+  visibility       AnswerVisibility @default(PUBLIC)
+  moderationStatus ModerationStatus @default(APPROVED) @map("moderation_status")
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([questionId])
+  @@index([userId])
+  @@index([visibility])
+  @@map("user_question_answers")
+}
+
 
 // -----------------------------------------------------------------------------
 // Module 11: Likes & Passes

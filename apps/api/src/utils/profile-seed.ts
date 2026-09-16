@@ -8,6 +8,7 @@ export async function ensureDefaultProfileSeeds(): Promise<{
   interests: { id: string; name: string; slug: string }[];
   templates: { id: string; question: string; category: string }[];
   intents: { id: string; code: string; label: string }[];
+  questions: { id: string; questionText: string; category: string }[];
 }> {
   // 1. Seed Categories & Interests
   let category = await prisma.interestCategory.findFirst({
@@ -111,9 +112,78 @@ export async function ensureDefaultProfileSeeds(): Promise<{
     });
   }
 
+  // 4. Seed Open-Ended Questions
+  const defaultQuestions = [
+    {
+      questionText: "What is a core value you will never compromise on?",
+      category: "VALUES" as const,
+      displayOrder: 1,
+      isActive: true
+    },
+    {
+      questionText: "How do you spend your ideal Sunday morning?",
+      category: "LIFESTYLE" as const,
+      displayOrder: 2,
+      isActive: true
+    },
+    {
+      questionText: "Are you an introvert, extrovert, or ambivert, and how does it show?",
+      category: "PERSONALITY" as const,
+      displayOrder: 3,
+      isActive: true
+    },
+    {
+      questionText: "What does healthy communication in a relationship look like to you?",
+      category: "RELATIONSHIPS" as const,
+      displayOrder: 4,
+      isActive: true
+    },
+    {
+      questionText: "What is the most spontaneous thing you've ever done?",
+      category: "FUN" as const,
+      displayOrder: 5,
+      isActive: true
+    },
+    {
+      questionText: "What is a life lesson that changed the way you see the world?",
+      category: "DEEP" as const,
+      displayOrder: 6,
+      isActive: true
+    },
+    {
+      questionText: "What is a small everyday ritual that keeps you grounded?",
+      category: "DAILY_LIFE" as const,
+      displayOrder: 7,
+      isActive: true
+    },
+    {
+      questionText: "Deprecated question that should be hidden.",
+      category: "FUN" as const,
+      displayOrder: 99,
+      isActive: false
+    }
+  ];
+
+  for (const q of defaultQuestions) {
+    const existing = await prisma.question.findFirst({
+      where: { questionText: q.questionText }
+    });
+    if (!existing) {
+      await prisma.question.create({
+        data: q
+      });
+    } else {
+      await prisma.question.update({
+        where: { id: existing.id },
+        data: { isActive: q.isActive, displayOrder: q.displayOrder }
+      });
+    }
+  }
+
   const interests = await prisma.interest.findMany({ where: { isActive: true } });
   const templates = await prisma.promptTemplate.findMany({ where: { isActive: true } });
   const intents = await prisma.relationshipIntent.findMany();
+  const questions = await prisma.question.findMany({ where: { isActive: true } });
 
-  return { interests, templates, intents };
+  return { interests, templates, intents, questions };
 }
