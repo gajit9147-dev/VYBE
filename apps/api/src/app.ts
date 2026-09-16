@@ -8,6 +8,7 @@ import { env } from "./config/env.js";
 import { logger } from "./config/logger.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { authRouter } from "./routes/auth.routes.js";
+import { discoveryRouter } from "./routes/discovery.routes.js";
 import { healthRouter } from "./routes/health.routes.js";
 import { interestsRouter } from "./routes/interests.routes.js";
 import { profileRouter } from "./routes/profile.routes.js";
@@ -29,6 +30,7 @@ app.use("/api/profile", profileRouter);
 app.use("/api/interests", interestsRouter);
 app.use("/api/relationship-intents", relationshipIntentsRouter);
 app.use("/api/questions", questionsRouter);
+app.use("/api/discovery", discoveryRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

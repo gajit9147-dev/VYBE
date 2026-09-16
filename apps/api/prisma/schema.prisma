@@ -94,6 +94,8 @@ model User {
   phoneVerificationTokens PhoneVerificationToken[]
   profileAuditLogs        ProfileAuditLog[]
   questionAnswers         UserQuestionAnswer[]
+  discoveryEventsGiven    DiscoveryEvent[]         @relation("UserDiscoveryEvents")
+  discoveryEventsReceived DiscoveryEvent[]         @relation("CandidateDiscoveryEvents")
 
   @@index([status])
   @@index([deletedAt])
@@ -553,6 +555,36 @@ model DiscoveryPreference {
 
   @@map("discovery_preferences")
 }
+
+// -----------------------------------------------------------------------------
+// Module 9B: Discovery Events & Telemetry
+// -----------------------------------------------------------------------------
+
+enum DiscoveryEventType {
+  VIEW
+  SKIP
+  OPEN_PROFILE
+  REPORT
+  BLOCK
+  OTHER
+}
+
+model DiscoveryEvent {
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String             @map("user_id") @db.Uuid
+  candidateUserId String             @map("candidate_user_id") @db.Uuid
+  eventType       DiscoveryEventType @map("event_type")
+  metadata        Json?              @db.JsonB
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user          User @relation("UserDiscoveryEvents", fields: [userId], references: [id], onDelete: Cascade)
+  candidateUser User @relation("CandidateDiscoveryEvents", fields: [candidateUserId], references: [id], onDelete: Cascade)
+
+  @@index([userId, candidateUserId, eventType])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("discovery_events")
+}
+
 
 // -----------------------------------------------------------------------------
 // Module 10: Questions & Answers (Compatibility Dimensions)

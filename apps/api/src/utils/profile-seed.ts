@@ -183,7 +183,10 @@ export async function ensureDefaultProfileSeeds(): Promise<{
   const interests = await prisma.interest.findMany({ where: { isActive: true } });
   const templates = await prisma.promptTemplate.findMany({ where: { isActive: true } });
   const intents = await prisma.relationshipIntent.findMany();
-  const questions = await prisma.question.findMany({ where: { isActive: true } });
+  const questions = await prisma.question.findMany({
+    where: { isActive: true },
+    orderBy: { displayOrder: "asc" }
+  });
 
   return { interests, templates, intents, questions };
 }
