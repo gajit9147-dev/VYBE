@@ -26,7 +26,16 @@ const environmentSchema = z.object({
   SMS_PROVIDER: z.enum(["memory", "twilio"]).default("memory"),
   TWILIO_ACCOUNT_SID: z.string().optional(),
   TWILIO_AUTH_TOKEN: z.string().optional(),
-  TWILIO_FROM_NUMBER: z.string().optional()
+  TWILIO_FROM_NUMBER: z.string().optional(),
+  STORAGE_PROVIDER: z.enum(["memory", "s3"]).default("memory"),
+  STORAGE_BUCKET: z.string().optional(),
+  STORAGE_REGION: z.string().optional(),
+  STORAGE_ENDPOINT: z.string().optional(),
+  STORAGE_ACCESS_KEY_ID: z.string().optional(),
+  STORAGE_SECRET_ACCESS_KEY: z.string().optional(),
+  STORAGE_CDN_URL: z.string().default("https://cdn.vybe.app"),
+  MAX_PHOTO_FILE_SIZE_BYTES: z.coerce.number().int().default(5 * 1024 * 1024),
+  MAX_PHOTOS_PER_USER: z.coerce.number().int().min(1).max(20).default(6)
 });
 
 const parsedEnvironment = environmentSchema.safeParse(process.env);

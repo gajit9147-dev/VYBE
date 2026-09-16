@@ -484,7 +484,9 @@ export async function getPublicProfile(
 
   const profile = await prisma.profile.findFirst({
     where: {
-      OR: isUuid ? [{ id: identifier }, { username: identifier }] : [{ username: identifier }],
+      OR: isUuid
+        ? [{ id: identifier }, { userId: identifier }, { username: identifier }]
+        : [{ username: identifier }],
       deletedAt: null
     },
     include: {
