@@ -1,6 +1,6 @@
 import { env } from "@/config/env";
 import { ApiClientError } from "./errors";
-import type { ApiResponse, RequestOptions } from "@/types/api";
+import type { RequestOptions } from "@/types/api";
 
 class ApiClient {
   private readonly baseUrl: string;
@@ -28,7 +28,7 @@ class ApiClient {
     method: string,
     path: string,
     options: RequestOptions = {}
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     const { params, data, headers, ...restOptions } = options;
     const url = this.buildUrl(path, params);
 
@@ -64,7 +64,7 @@ class ApiClient {
         throw ApiClientError.fromHttp(response.status, responseData ?? undefined);
       }
 
-      return (responseData as unknown) as ApiResponse<T>;
+      return (responseData as unknown) as T;
     } catch (error: unknown) {
       if (error instanceof ApiClientError) {
         throw error;
@@ -73,23 +73,23 @@ class ApiClient {
     }
   }
 
-  public get<T>(path: string, options?: RequestOptions): Promise<ApiResponse<T>> {
+  public get<T>(path: string, options?: RequestOptions): Promise<T> {
     return this.request<T>("GET", path, options);
   }
 
-  public post<T>(path: string, data?: unknown, options?: Omit<RequestOptions, "data">): Promise<ApiResponse<T>> {
+  public post<T>(path: string, data?: unknown, options?: Omit<RequestOptions, "data">): Promise<T> {
     return this.request<T>("POST", path, { ...options, data });
   }
 
-  public patch<T>(path: string, data?: unknown, options?: Omit<RequestOptions, "data">): Promise<ApiResponse<T>> {
+  public patch<T>(path: string, data?: unknown, options?: Omit<RequestOptions, "data">): Promise<T> {
     return this.request<T>("PATCH", path, { ...options, data });
   }
 
-  public put<T>(path: string, data?: unknown, options?: Omit<RequestOptions, "data">): Promise<ApiResponse<T>> {
+  public put<T>(path: string, data?: unknown, options?: Omit<RequestOptions, "data">): Promise<T> {
     return this.request<T>("PUT", path, { ...options, data });
   }
 
-  public delete<T>(path: string, options?: RequestOptions): Promise<ApiResponse<T>> {
+  public delete<T>(path: string, options?: RequestOptions): Promise<T> {
     return this.request<T>("DELETE", path, options);
   }
 }
