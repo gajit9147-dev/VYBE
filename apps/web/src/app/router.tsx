@@ -7,6 +7,7 @@ import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { VerifyEmailPage } from "@/pages/VerifyEmailPage";
 import { VerifyPhonePage } from "@/pages/VerifyPhonePage";
+import { ProfileSetupPage } from "@/pages/ProfileSetupPage";
 import { AppHomePage } from "@/pages/AppHomePage";
 import { ShellDemoPage } from "@/pages/ShellDemoPage";
 import { DesignSystemPage } from "@/pages/DesignSystemPage";
@@ -92,6 +93,10 @@ export const router = createBrowserRouter([
           {
             path: "shell-demo",
             element: <ShellDemoPage />,
+          },
+          {
+            path: "profile/setup",
+            element: <ProfileSetupPage />,
           },
         ],
       },
