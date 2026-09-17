@@ -124,38 +124,56 @@
   color: var(--vybe-text-primary);
 }
 
-/* Glass Surface Utilities */
+/* Glass Surface Utilities — Frosted Satin Liquid Glass */
 .vybe-glass {
-  background-color: var(--vybe-glass-bg);
-  backdrop-filter: blur(var(--vybe-glass-blur));
-  -webkit-backdrop-filter: blur(var(--vybe-glass-blur));
+  background: var(--vybe-glass-bg);
+  backdrop-filter: blur(var(--vybe-glass-blur)) saturate(160%) brightness(102%);
+  -webkit-backdrop-filter: blur(var(--vybe-glass-blur)) saturate(160%) brightness(102%);
   border: 1px solid var(--vybe-glass-border);
+  border-top-color: var(--vybe-glass-border-top);
+  border-bottom-color: var(--vybe-glass-border-bottom);
   box-shadow: var(--vybe-glass-highlight), var(--vybe-glass-shadow);
 }
 
 .vybe-glass-strong {
-  background-color: var(--vybe-glass-strong-bg);
-  backdrop-filter: blur(var(--vybe-glass-blur-lg));
-  -webkit-backdrop-filter: blur(var(--vybe-glass-blur-lg));
+  background: var(--vybe-glass-strong-bg);
+  backdrop-filter: blur(var(--vybe-glass-blur-lg)) saturate(175%) brightness(105%);
+  -webkit-backdrop-filter: blur(var(--vybe-glass-blur-lg)) saturate(175%) brightness(105%);
   border: 1px solid var(--vybe-glass-border);
+  border-top-color: var(--vybe-glass-border-top);
+  border-bottom-color: var(--vybe-glass-border-bottom);
   box-shadow: var(--vybe-glass-highlight), var(--vybe-glass-shadow-lg);
 }
 
 .vybe-glass-subtle {
-  background-color: var(--vybe-glass-subtle-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  background: var(--vybe-glass-subtle-bg);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top-color: rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.20), 0 8px 24px -4px rgba(0, 0, 0, 0.35);
+}
+
+/* Floating Satin Capsule Pill (Exact user reference style) */
+.vybe-glass-capsule {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(200, 205, 218, 0.13) 22%, rgba(45, 50, 62, 0.40) 65%, rgba(18, 20, 26, 0.68) 100%);
+  backdrop-filter: blur(32px) saturate(175%) brightness(105%);
+  -webkit-backdrop-filter: blur(32px) saturate(175%) brightness(105%);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  border-top-color: rgba(255, 255, 255, 0.45);
+  border-bottom-color: rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.40), 0 20px 45px -10px rgba(0, 0, 0, 0.65), 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .vybe-glass-interactive {
-  transition: background-color var(--vybe-motion-fast), border-color var(--vybe-motion-fast), transform var(--vybe-motion-fast), box-shadow var(--vybe-motion-fast);
+  transition: background var(--vybe-motion-fast), border-color var(--vybe-motion-fast), transform var(--vybe-motion-fast), box-shadow var(--vybe-motion-fast);
 }
 .vybe-glass-interactive:hover {
-  background-color: var(--vybe-glass-hover-bg);
+  background: var(--vybe-glass-hover-bg);
   border-color: var(--vybe-glass-hover-border);
-  transform: translateY(-1px);
+  border-top-color: rgba(255, 255, 255, 0.50);
+  transform: translateY(-1.5px);
+  box-shadow: inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.65), 0 22px 48px -10px rgba(0, 0, 0, 0.70);
 }
 
 /* Gradient text utility */

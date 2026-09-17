@@ -1,21 +1,23 @@
 :root {
   /* Background tokens */
   --vybe-bg-app: #030712;
-  --vybe-bg-elevated: rgba(15, 23, 42, 0.7);
+  --vybe-bg-elevated: rgba(15, 23, 42, 0.75);
   --vybe-bg-secondary: #0b1120;
-  --vybe-glass-bg: rgba(255, 255, 255, 0.04);
-  --vybe-glass-strong-bg: rgba(255, 255, 255, 0.08);
-  --vybe-glass-subtle-bg: rgba(255, 255, 255, 0.02);
-  --vybe-glass-hover-bg: rgba(255, 255, 255, 0.07);
+  --vybe-glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(200, 205, 218, 0.12) 22%, rgba(42, 46, 56, 0.38) 65%, rgba(18, 20, 26, 0.65) 100%);
+  --vybe-glass-strong-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(215, 220, 230, 0.15) 20%, rgba(48, 54, 66, 0.46) 60%, rgba(16, 18, 24, 0.75) 100%);
+  --vybe-glass-subtle-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(30, 35, 45, 0.35) 100%);
+  --vybe-glass-hover-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.32) 0%, rgba(225, 230, 240, 0.18) 22%, rgba(55, 62, 75, 0.52) 65%, rgba(24, 28, 36, 0.78) 100%);
 
   /* Glass tokens */
-  --vybe-glass-border: rgba(255, 255, 255, 0.10);
-  --vybe-glass-hover-border: rgba(255, 255, 255, 0.22);
-  --vybe-glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
-  --vybe-glass-blur: 16px;
-  --vybe-glass-blur-lg: 24px;
-  --vybe-glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.40);
-  --vybe-glass-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.55);
+  --vybe-glass-border: rgba(255, 255, 255, 0.18);
+  --vybe-glass-border-top: rgba(255, 255, 255, 0.38);
+  --vybe-glass-border-bottom: rgba(255, 255, 255, 0.10);
+  --vybe-glass-hover-border: rgba(255, 255, 255, 0.35);
+  --vybe-glass-highlight: inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.50), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.35);
+  --vybe-glass-blur: 24px;
+  --vybe-glass-blur-lg: 36px;
+  --vybe-glass-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.60), 0 4px 16px rgba(0, 0, 0, 0.35);
+  --vybe-glass-shadow-lg: 0 24px 50px -12px rgba(0, 0, 0, 0.75), 0 8px 24px rgba(0, 0, 0, 0.45);
 
   /* Text tokens */
   --vybe-text-primary: #f8fafc;
@@ -47,8 +49,9 @@
   --vybe-radius-sm: 8px;
   --vybe-radius-md: 12px;
   --vybe-radius-lg: 16px;
-  --vybe-radius-xl: 20px;
-  --vybe-radius-2xl: 24px;
+  --vybe-radius-xl: 24px;
+  --vybe-radius-2xl: 32px;
+  --vybe-radius-3xl: 40px;
   --vybe-radius-pill: 9999px;
 
   /* Spacing tokens */

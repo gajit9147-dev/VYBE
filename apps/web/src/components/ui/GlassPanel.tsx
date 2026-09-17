@@ -1,6 +1,6 @@
 import React from "react";
 
-export type GlassPanelVariant = "default" | "strong" | "subtle" | "interactive";
+export type GlassPanelVariant = "default" | "strong" | "subtle" | "interactive" | "capsule";
 
 export interface GlassPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: GlassPanelVariant;
@@ -10,10 +10,11 @@ export interface GlassPanelProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const variantStyles: Record<GlassPanelVariant, string> = {
-  default: "vybe-glass rounded-2xl",
-  strong: "vybe-glass-strong rounded-2xl",
-  subtle: "vybe-glass-subtle rounded-xl",
-  interactive: "vybe-glass vybe-glass-interactive rounded-2xl cursor-pointer"
+  default: "vybe-glass rounded-[28px]",
+  strong: "vybe-glass-strong rounded-[28px]",
+  subtle: "vybe-glass-subtle rounded-2xl",
+  interactive: "vybe-glass vybe-glass-interactive rounded-[28px] cursor-pointer",
+  capsule: "vybe-glass-capsule rounded-full"
 };
 
 export const GlassPanel = React.forwardRef<HTMLDivElement, GlassPanelProps>(

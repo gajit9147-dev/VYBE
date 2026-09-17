@@ -20,7 +20,7 @@ export interface GlassBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<GlassBadgeVariant, string> = {
-  default: "bg-white/10 text-slate-200 border-white/10",
+  default: "vybe-glass-capsule text-white border-white/25 border-t-white/45 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]",
   pink: "bg-rose-500/15 text-rose-300 border-rose-500/30",
   peach: "bg-orange-500/15 text-orange-300 border-orange-500/30",
   purple: "bg-purple-500/15 text-purple-300 border-purple-500/30",

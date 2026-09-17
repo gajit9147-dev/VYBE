@@ -69,10 +69,10 @@ export const NavigationItem: React.FC<NavigationItemProps> = ({
       end={item.route === "/app"}
       onClick={onClick}
       className={({ isActive }) =>
-        `group relative flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-pink-500 ${
+        `group relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-pink-500 ${
           isActive
-            ? "bg-gradient-to-r from-rose-500/20 to-purple-600/15 border border-pink-500/30 text-white shadow-[0_0_16px_rgba(244,63,94,0.2)]"
-            : "text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent"
+            ? "vybe-glass-capsule text-white border border-white/25 border-t-white/50 shadow-[inset_0_1.5px_2px_rgba(255,255,255,0.45),0_8px_24px_rgba(0,0,0,0.45)]"
+            : "text-slate-300 hover:text-white hover:bg-white/5 border border-transparent"
         } ${className}`
       }
     >

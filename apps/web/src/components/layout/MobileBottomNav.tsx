@@ -21,9 +21,9 @@ export const MobileBottomNav: React.FC = () => {
   return (
     <nav
       aria-label="Mobile bottom navigation"
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-slate-950/85 backdrop-blur-xl shadow-[0_-8px_32px_rgba(0,0,0,0.5)] pb-[env(safe-area-inset-bottom,0.5rem)]"
+      className="lg:hidden fixed bottom-3 left-4 right-4 z-40 max-w-md mx-auto vybe-glass-capsule pb-[env(safe-area-inset-bottom,0px)]"
     >
-      <div className="flex items-center justify-around px-2 h-16 max-w-lg mx-auto">
+      <div className="flex items-center justify-around px-3 h-16 w-full">
         {mobileNavigation.map((item) => (
           <NavigationItem
             key={item.id}

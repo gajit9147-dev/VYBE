@@ -101,7 +101,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ className = "" }
 
       {/* Bottom Profile Anchor with Logout */}
       <div className="p-4 border-t border-white/5 bg-slate-950/40">
-        <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-white/5 bg-white/5 backdrop-blur-md">
+        <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-full vybe-glass-capsule">
           <div className="flex items-center gap-2.5 min-w-0">
             <GlassAvatar
               size="sm"

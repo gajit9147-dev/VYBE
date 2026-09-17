@@ -16,21 +16,21 @@ export interface GlassButtonProps extends React.ButtonHTMLAttributes<HTMLButtonE
 
 const variantStyles: Record<GlassButtonVariant, string> = {
   primary:
-    "bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white shadow-[0_0_20px_rgba(244,63,94,0.35)] hover:shadow-[0_0_26px_rgba(244,63,94,0.5)] border border-pink-400/30 hover:opacity-95 active:scale-[0.98]",
+    "bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white shadow-[0_6px_24px_rgba(244,63,94,0.40),inset_0_1.5px_2px_rgba(255,255,255,0.50)] hover:shadow-[0_8px_32px_rgba(244,63,94,0.55),inset_0_1.5px_2px_rgba(255,255,255,0.65)] border border-pink-400/40 border-t-white/40 hover:opacity-95 active:scale-[0.98]",
   secondary:
-    "vybe-glass text-slate-100 hover:bg-white/10 hover:border-white/20 active:scale-[0.98]",
+    "vybe-glass-capsule text-white hover:border-white/35 active:scale-[0.98]",
   ghost:
-    "bg-transparent text-slate-300 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 active:scale-[0.98]",
+    "bg-transparent text-slate-200 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/15 active:scale-[0.98]",
   danger:
-    "bg-red-500/15 border border-red-500/30 text-red-300 hover:bg-red-500/25 hover:border-red-500/50 active:scale-[0.98]",
+    "bg-red-500/20 border border-red-500/35 border-t-red-400/50 text-red-200 hover:bg-red-500/30 hover:border-red-500/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] active:scale-[0.98]",
   success:
-    "bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25 hover:border-emerald-500/50 active:scale-[0.98]"
+    "bg-emerald-500/20 border border-emerald-500/35 border-t-emerald-400/50 text-emerald-200 hover:bg-emerald-500/30 hover:border-emerald-500/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] active:scale-[0.98]"
 };
 
 const sizeStyles: Record<GlassButtonSize, string> = {
-  sm: "px-3 py-1.5 text-xs font-medium rounded-lg gap-1.5",
-  md: "px-4 py-2 text-sm font-medium rounded-xl gap-2",
-  lg: "px-6 py-3 text-base font-semibold rounded-2xl gap-2.5"
+  sm: "px-3.5 py-1.5 text-xs font-medium rounded-full gap-1.5 tracking-[-0.01em]",
+  md: "px-5 py-2.5 text-sm font-medium rounded-full gap-2 tracking-[-0.01em]",
+  lg: "px-7 py-3.5 text-base font-semibold rounded-full gap-2.5 tracking-[-0.015em]"
 };
 
 export const GlassButton = React.forwardRef<HTMLButtonElement, GlassButtonProps>(
