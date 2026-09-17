@@ -17,13 +17,13 @@ export const VerifyEmailPage: React.FC = () => {
     user?.email ||
     (isPreview ? (searchParams.get("email") || "alex.rivera@vybe.io") : undefined);
 
-  if (isLoading && !isPreview) {
-    return <PageLoading message="Checking verification status..." />;
-  }
-
-  // If a token is provided in URL query parameters, allow direct token consumption
+  // If a token is provided in URL query parameters, allow direct token consumption immediately
   if (token) {
     return <VerifyEmailConfirm token={token} />;
+  }
+
+  if (isLoading && !isPreview) {
+    return <PageLoading message="Checking verification status..." />;
   }
 
   // If user is unauthenticated and there is no token (and not in preview mode), redirect to login

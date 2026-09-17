@@ -5,9 +5,10 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { GlassSpinner } from "@/components/ui/GlassSpinner";
 import { AuthHeader } from "./AuthHeader";
-import { useVerifyEmailToken, useAuth } from "../hooks/useAuth";
+import { useVerifyEmailToken, useAuth, AUTH_QUERY_KEY } from "../hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 import { ApiClientError } from "@/services/api/errors";
-import { VerifyEmailResponse } from "../types/authTypes";
+import { VerifyEmailResponse, SafeUser } from "../types/authTypes";
 
 interface VerifyEmailConfirmProps {
   token: string;
@@ -17,6 +18,7 @@ type ConfirmState = "verifying" | "success" | "expired" | "invalid" | "rate_limi
 
 export const VerifyEmailConfirm: React.FC<VerifyEmailConfirmProps> = ({ token }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { refetchUser } = useAuth();
   const verifyMutation = useVerifyEmailToken();
   const [status, setStatus] = useState<ConfirmState>("verifying");
@@ -25,6 +27,15 @@ export const VerifyEmailConfirm: React.FC<VerifyEmailConfirmProps> = ({ token })
 
   // Prevent double-invocation in React StrictMode
   const verifiedRef = useRef(false);
+
+  const handleContinue = async () => {
+    queryClient.setQueryData(AUTH_QUERY_KEY, (old: SafeUser | null | undefined) => {
+      if (!old) return old;
+      return { ...old, isVerified: true };
+    });
+    await refetchUser();
+    navigate("/app", { replace: true });
+  };
 
   useEffect(() => {
     if (!token || verifiedRef.current) return;
@@ -35,6 +46,10 @@ export const VerifyEmailConfirm: React.FC<VerifyEmailConfirmProps> = ({ token })
         const result = await verifyMutation.mutateAsync(token);
         setVerifyResult(result);
         setStatus("success");
+        queryClient.setQueryData(AUTH_QUERY_KEY, (old: SafeUser | null | undefined) => {
+          if (!old) return old;
+          return { ...old, isVerified: true };
+        });
         await refetchUser();
       } catch (err: unknown) {
         if (err instanceof ApiClientError) {
@@ -114,7 +129,7 @@ export const VerifyEmailConfirm: React.FC<VerifyEmailConfirmProps> = ({ token })
                 variant="primary"
                 size="lg"
                 fullWidth
-                onClick={() => navigate("/app", { replace: true })}
+                onClick={handleContinue}
                 className="min-h-12 font-medium"
               >
                 <span>Continue to VYBE</span>

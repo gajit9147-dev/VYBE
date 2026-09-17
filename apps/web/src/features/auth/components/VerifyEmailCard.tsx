@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, CheckCircle, RefreshCw, AlertCircle, LogOut, Sparkles, ExternalLink } from "lucide-react";
+import { Mail, CheckCircle, RefreshCw, AlertCircle, LogOut, Sparkles, ExternalLink, ArrowRight } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { AuthHeader } from "./AuthHeader";
@@ -8,9 +9,11 @@ import { maskEmail } from "../utils/maskEmail";
 import {
   useAuth,
   useSendVerificationEmail,
-  useEmailVerificationStatus
+  useEmailVerificationStatus,
+  AUTH_QUERY_KEY
 } from "../hooks/useAuth";
 import { ApiClientError } from "@/services/api/errors";
+import { SafeUser } from "../types/authTypes";
 
 interface VerifyEmailCardProps {
   initialEmail?: string;
@@ -18,6 +21,7 @@ interface VerifyEmailCardProps {
 
 export const VerifyEmailCard: React.FC<VerifyEmailCardProps> = ({ initialEmail }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, logout, isLoggingOut, refetchUser } = useAuth();
   const sendVerificationMutation = useSendVerificationEmail();
 
@@ -54,13 +58,6 @@ export const VerifyEmailCard: React.FC<VerifyEmailCardProps> = ({ initialEmail }
     }
     fetchDevLink();
   }, [successMessage, userEmail]);
-
-  // If status query or user shows verified, automatically navigate to /app
-  useEffect(() => {
-    if (user?.isVerified || statusData?.isVerified) {
-      navigate("/app", { replace: true });
-    }
-  }, [user?.isVerified, statusData?.isVerified, navigate]);
 
   // Cooldown interval timer
   useEffect(() => {
@@ -105,11 +102,25 @@ export const VerifyEmailCard: React.FC<VerifyEmailCardProps> = ({ initialEmail }
     }
   };
 
+  const handleContinueToApp = async () => {
+    queryClient.setQueryData(AUTH_QUERY_KEY, (old: SafeUser | null | undefined) => {
+      if (!old) return old;
+      return { ...old, isVerified: true };
+    });
+    await refetchUser();
+    navigate("/app", { replace: true });
+  };
+
   const handleCheckStatus = async () => {
     setErrorMessage(null);
     try {
       const [newStatus, newUser] = await Promise.all([refetchStatus(), refetchUser()]);
       if (newStatus.data?.isVerified || newUser.data?.isVerified) {
+        queryClient.setQueryData(AUTH_QUERY_KEY, (old: SafeUser | null | undefined) => {
+          if (!old) return old;
+          return { ...old, isVerified: true };
+        });
+        await refetchUser();
         navigate("/app", { replace: true });
       } else {
         setErrorMessage("Your email has not been verified yet. Please click the link in your email.");
@@ -127,6 +138,42 @@ export const VerifyEmailCard: React.FC<VerifyEmailCardProps> = ({ initialEmail }
       navigate("/auth/login", { replace: true });
     }
   };
+
+  const isAlreadyVerified = Boolean(user?.isVerified || statusData?.isVerified);
+
+  if (isAlreadyVerified) {
+    return (
+      <div className="w-full">
+        <AuthHeader
+          title="Email verified"
+          subtitle="Your account is activated and ready."
+        />
+        <GlassCard variant="strong" padding="lg" className="w-full flex flex-col items-center text-center space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/10">
+            <CheckCircle className="w-8 h-8" />
+          </div>
+          <div className="space-y-1.5">
+            <h2 className="text-xl font-bold text-white tracking-tight">Verified Successfully</h2>
+            <p className="text-xs sm:text-sm text-slate-300">
+              {maskedUserEmail ? `${maskedUserEmail} is verified.` : "Your email address has been verified."}
+            </p>
+          </div>
+          <div className="w-full pt-2">
+            <GlassButton
+              variant="primary"
+              size="lg"
+              fullWidth
+              onClick={handleContinueToApp}
+              className="min-h-12 font-medium"
+            >
+              <span>Continue to VYBE</span>
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </GlassButton>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -184,13 +231,21 @@ export const VerifyEmailCard: React.FC<VerifyEmailCardProps> = ({ initialEmail }
             <p className="text-slate-300 text-[11px] leading-relaxed">
               No live SMTP service is configured in <code>apps/api/.env</code>. Your verification link was captured by the in-memory provider:
             </p>
-            <a
-              href={devLink}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-xs font-medium transition-colors"
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  const parsed = new URL(devLink);
+                  navigate(`${parsed.pathname}${parsed.search}`);
+                } catch {
+                  window.location.href = devLink;
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-xs font-medium transition-colors cursor-pointer"
             >
               <span>Click to complete email verification</span>
               <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            </button>
           </div>
         )}
 

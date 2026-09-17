@@ -81,7 +81,15 @@ export function useVerifyEmailToken() {
 
   return useMutation({
     mutationFn: (token: string) => authApi.verifyEmail(token),
-    onSuccess: () => {
+    onSuccess: (result) => {
+      queryClient.setQueryData(AUTH_QUERY_KEY, (old: SafeUser | null | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          isVerified: true,
+          emailVerifiedAt: result.verifiedAt || new Date().toISOString()
+        };
+      });
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ["auth", "email-verification"] });
     }
