@@ -9,10 +9,14 @@ export * from "./components/ProtectedRoute";
 export * from "./components/PublicAuthRoute";
 export * from "./components/VerifiedRoute";
 export * from "./components/AuthLoadingScreen";
+export * from "./components/PhoneInput";
+export * from "./components/OtpInput";
+export * from "./components/VerifyPhoneCard";
 export * from "./hooks/useAuth";
 export * from "./hooks/authKeys";
 export * from "./schemas/authSchemas";
+export * from "./schemas/phoneSchemas";
 export * from "./types/authTypes";
 export * from "./utils/maskEmail";
+export * from "./utils/maskPhone";
 export * from "./utils/safeRedirect";
-

@@ -6,6 +6,7 @@ import { WelcomePage } from "@/features/landing";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { VerifyEmailPage } from "@/pages/VerifyEmailPage";
+import { VerifyPhonePage } from "@/pages/VerifyPhonePage";
 import { AppHomePage } from "@/pages/AppHomePage";
 import { ShellDemoPage } from "@/pages/ShellDemoPage";
 import { DesignSystemPage } from "@/pages/DesignSystemPage";
@@ -25,13 +26,13 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <WelcomePage />
+            element: <WelcomePage />,
           },
           {
             path: "design-system",
-            element: <DesignSystemPage />
-          }
-        ]
+            element: <DesignSystemPage />,
+          },
+        ],
       },
       // Auth Route Tier
       {
@@ -44,24 +45,32 @@ export const router = createBrowserRouter([
             children: [
               {
                 path: "login",
-                element: <LoginPage />
+                element: <LoginPage />,
               },
               {
                 path: "register",
-                element: <RegisterPage />
-              }
-            ]
+                element: <RegisterPage />,
+              },
+            ],
           },
           // Email Verification screens (handles unverified users and token confirmation)
           {
             path: "verify-email",
-            element: <VerifyEmailPage />
+            element: <VerifyEmailPage />,
           },
           {
             path: "verify-email/confirm",
-            element: <VerifyEmailPage />
-          }
-        ]
+            element: <VerifyEmailPage />,
+          },
+          {
+            path: "verify-phone",
+            element: (
+              <VerifiedRoute>
+                <VerifyPhonePage />
+              </VerifiedRoute>
+            ),
+          },
+        ],
       },
       // Authenticated App Route Tier (protected against unauthenticated users)
       {
@@ -74,17 +83,17 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <AppHomePage />
+            element: <AppHomePage />,
           },
           {
             path: "discover",
-            element: <AppHomePage />
+            element: <AppHomePage />,
           },
           {
             path: "shell-demo",
-            element: <ShellDemoPage />
-          }
-        ]
+            element: <ShellDemoPage />,
+          },
+        ],
       },
       // Catch-all 404 Route
       {
@@ -93,10 +102,10 @@ export const router = createBrowserRouter([
         children: [
           {
             path: "*",
-            element: <NotFoundPage />
-          }
-        ]
-      }
-    ]
-  }
+            element: <NotFoundPage />,
+          },
+        ],
+      },
+    ],
+  },
 ]);
