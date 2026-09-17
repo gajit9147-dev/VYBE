@@ -1,0 +1,66 @@
+:root {
+  /* Background tokens */
+  --vybe-bg-app: #030712;
+  --vybe-bg-elevated: rgba(15, 23, 42, 0.7);
+  --vybe-bg-secondary: #0b1120;
+  --vybe-glass-bg: rgba(255, 255, 255, 0.04);
+  --vybe-glass-strong-bg: rgba(255, 255, 255, 0.08);
+  --vybe-glass-subtle-bg: rgba(255, 255, 255, 0.02);
+  --vybe-glass-hover-bg: rgba(255, 255, 255, 0.07);
+
+  /* Glass tokens */
+  --vybe-glass-border: rgba(255, 255, 255, 0.10);
+  --vybe-glass-hover-border: rgba(255, 255, 255, 0.22);
+  --vybe-glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+  --vybe-glass-blur: 16px;
+  --vybe-glass-blur-lg: 24px;
+  --vybe-glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.40);
+  --vybe-glass-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.55);
+
+  /* Text tokens */
+  --vybe-text-primary: #f8fafc;
+  --vybe-text-secondary: #94a3b8;
+  --vybe-text-muted: #64748b;
+  --vybe-text-disabled: #475569;
+  --vybe-text-inverse: #030712;
+
+  /* Accent & Atmosphere tokens */
+  --vybe-accent-pink: #f43f5e;
+  --vybe-accent-peach: #fb923c;
+  --vybe-accent-purple: #a855f7;
+  --vybe-accent-blue: #38bdf8;
+  --vybe-accent-gradient: linear-gradient(135deg, #f43f5e 0%, #ec4899 45%, #a855f7 100%);
+  --vybe-accent-glow: 0 0 24px -4px rgba(244, 63, 94, 0.45);
+
+  /* Semantic status tokens */
+  --vybe-status-success: #10b981;
+  --vybe-status-warning: #f59e0b;
+  --vybe-status-danger: #ef4444;
+  --vybe-status-info: #0ea5e9;
+
+  /* Border width tokens */
+  --vybe-border-subtle: 1px solid rgba(255, 255, 255, 0.08);
+  --vybe-border-normal: 1px solid rgba(255, 255, 255, 0.12);
+  --vybe-border-strong: 1px solid rgba(255, 255, 255, 0.22);
+
+  /* Radius tokens */
+  --vybe-radius-sm: 8px;
+  --vybe-radius-md: 12px;
+  --vybe-radius-lg: 16px;
+  --vybe-radius-xl: 20px;
+  --vybe-radius-2xl: 24px;
+  --vybe-radius-pill: 9999px;
+
+  /* Spacing tokens */
+  --vybe-spacing-xs: 4px;
+  --vybe-spacing-sm: 8px;
+  --vybe-spacing-md: 16px;
+  --vybe-spacing-lg: 24px;
+  --vybe-spacing-xl: 32px;
+  --vybe-spacing-2xl: 48px;
+
+  /* Motion tokens */
+  --vybe-motion-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --vybe-motion-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --vybe-motion-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}

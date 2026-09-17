@@ -35,7 +35,11 @@ const environmentSchema = z.object({
   STORAGE_SECRET_ACCESS_KEY: z.string().optional(),
   STORAGE_CDN_URL: z.string().default("https://cdn.vybe.app"),
   MAX_PHOTO_FILE_SIZE_BYTES: z.coerce.number().int().default(5 * 1024 * 1024),
-  MAX_PHOTOS_PER_USER: z.coerce.number().int().min(1).max(20).default(6)
+  MAX_PHOTOS_PER_USER: z.coerce.number().int().min(1).max(20).default(6),
+  WS_ALLOWED_ORIGINS: z.string().optional(),
+  MESSAGE_MAX_LENGTH: z.coerce.number().int().min(1).max(20000).default(4000),
+  MESSAGE_EDIT_WINDOW_MINUTES: z.coerce.number().int().min(1).max(1440).default(15),
+  MESSAGE_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).max(600).default(60)
 });
 
 const parsedEnvironment = environmentSchema.safeParse(process.env);

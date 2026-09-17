@@ -1,6 +1,7 @@
 import { prisma } from "../config/db.js";
 import { AppError } from "../utils/app-error.js";
 import { calculateAge } from "../utils/profile.js";
+import { realtimeService } from "./realtime.service.js";
 
 function mapSafePartnerDto(user: any) {
   if (!user || !user.profile) {
@@ -209,7 +210,23 @@ export async function unmatchUser(
         metadata: reasonCode ? { reasonCode } : undefined
       }
     });
+
+    await tx.conversation.updateMany({
+      where: { matchId, status: "ACTIVE" },
+      data: { status: "CLOSED" }
+    });
   });
+
+  const partnerId = match.user1Id === requestingUserId ? match.user2Id : match.user1Id;
+  const conv = await prisma.conversation.findUnique({ where: { matchId } });
+  if (conv) {
+    await realtimeService.publishEvent({
+      type: "conversation.updated",
+      conversationId: conv.id,
+      status: "CLOSED",
+      recipientIds: [match.user1Id, match.user2Id]
+    });
+  }
 
   return {
     success: true,

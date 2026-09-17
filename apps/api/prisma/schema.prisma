@@ -318,35 +318,35 @@ enum ExerciseFrequency {
 }
 
 model Profile {
-  id                  String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId              String                      @unique @map("user_id") @db.Uuid
-  displayName         String                      @map("display_name") @db.VarChar(50)
-  firstName           String?                     @map("first_name") @db.VarChar(50)
-  username            String?                     @unique @db.VarChar(30)
-  birthDate           DateTime                    @map("birth_date") @db.Date
-  gender              Gender
-  pronouns            String?                     @db.VarChar(32)
-  bio                 String?                     @db.Text
-  city                String?                     @db.VarChar(100)
-  country             String?                     @db.VarChar(100)
-  heightCm            Int?                        @map("height_cm") @db.SmallInt
-  occupation          String?                     @db.VarChar(100)
-  company             String?                     @db.VarChar(100)
-  education           String?                     @db.VarChar(100)
-  drinking            DrinkingFrequency?
-  smoking             SmokingFrequency?
-  exercise            ExerciseFrequency?
-  starSign            String?                     @map("star_sign") @db.VarChar(20)
-  languages           String[]                    @default([])
-  completionScore     Int                         @default(0) @map("completion_score") @db.SmallInt
-  isIncognito         Boolean                     @default(false) @map("is_incognito")
-  isDiscoverable      Boolean                     @default(true) @map("is_discoverable")
-  showAge             Boolean                     @default(true) @map("show_age")
-  showDistance        Boolean                     @default(true) @map("show_distance")
-  crossedPathOptIn    Boolean                     @default(true) @map("crossed_path_opt_in")
-  createdAt           DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt           DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt           DateTime?                   @map("deleted_at") @db.Timestamptz(6)
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String             @unique @map("user_id") @db.Uuid
+  displayName      String             @map("display_name") @db.VarChar(50)
+  firstName        String?            @map("first_name") @db.VarChar(50)
+  username         String?            @unique @db.VarChar(30)
+  birthDate        DateTime           @map("birth_date") @db.Date
+  gender           Gender
+  pronouns         String?            @db.VarChar(32)
+  bio              String?            @db.Text
+  city             String?            @db.VarChar(100)
+  country          String?            @db.VarChar(100)
+  heightCm         Int?               @map("height_cm") @db.SmallInt
+  occupation       String?            @db.VarChar(100)
+  company          String?            @db.VarChar(100)
+  education        String?            @db.VarChar(100)
+  drinking         DrinkingFrequency?
+  smoking          SmokingFrequency?
+  exercise         ExerciseFrequency?
+  starSign         String?            @map("star_sign") @db.VarChar(20)
+  languages        String[]           @default([])
+  completionScore  Int                @default(0) @map("completion_score") @db.SmallInt
+  isIncognito      Boolean            @default(false) @map("is_incognito")
+  isDiscoverable   Boolean            @default(true) @map("is_discoverable")
+  showAge          Boolean            @default(true) @map("show_age")
+  showDistance     Boolean            @default(true) @map("show_distance")
+  crossedPathOptIn Boolean            @default(true) @map("crossed_path_opt_in")
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt        DateTime?          @map("deleted_at") @db.Timestamptz(6)
 
   user                User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
   photos              ProfilePhoto[]
@@ -590,7 +590,6 @@ model DiscoveryEvent {
   @@map("discovery_events")
 }
 
-
 // -----------------------------------------------------------------------------
 // Module 10: Questions & Answers (Compatibility Dimensions)
 // -----------------------------------------------------------------------------
@@ -698,7 +697,6 @@ model UserQuestionAnswer {
   @@map("user_question_answers")
 }
 
-
 // -----------------------------------------------------------------------------
 // Module 11: Likes & Passes
 // -----------------------------------------------------------------------------
@@ -735,7 +733,7 @@ model ProfileInteraction {
   comment           String?                @db.Text
   isConsumedByMatch Boolean                @default(false) @map("is_consumed_by_match")
   createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime               @updatedAt @default(now()) @map("updated_at") @db.Timestamptz(6)
+  updatedAt         DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   actor  User @relation("ActorInteractions", fields: [actorUserId], references: [id], onDelete: Cascade)
   target User @relation("TargetInteractions", fields: [targetUserId], references: [id], onDelete: Cascade)
@@ -833,19 +831,25 @@ model MatchEvent {
 // Module 13: Conversations
 // -----------------------------------------------------------------------------
 
+enum ConversationStatus {
+  ACTIVE
+  CLOSED
+}
+
 model Conversation {
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matchId         String    @unique @map("match_id") @db.Uuid
-  user1Id         String    @map("user1_id") @db.Uuid
-  user2Id         String    @map("user2_id") @db.Uuid
-  lastMessageId   String?   @map("last_message_id") @db.Uuid
-  lastMessageAt   DateTime? @map("last_message_at") @db.Timestamptz(6)
-  user1LastReadAt DateTime? @map("user1_last_read_at") @db.Timestamptz(6)
-  user2LastReadAt DateTime? @map("user2_last_read_at") @db.Timestamptz(6)
-  user1MutedUntil DateTime? @map("user1_muted_until") @db.Timestamptz(6)
-  user2MutedUntil DateTime? @map("user2_muted_until") @db.Timestamptz(6)
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId         String             @unique @map("match_id") @db.Uuid
+  user1Id         String             @map("user1_id") @db.Uuid
+  user2Id         String             @map("user2_id") @db.Uuid
+  status          ConversationStatus @default(ACTIVE)
+  lastMessageId   String?            @map("last_message_id") @db.Uuid
+  lastMessageAt   DateTime?          @map("last_message_at") @db.Timestamptz(6)
+  user1LastReadAt DateTime?          @map("user1_last_read_at") @db.Timestamptz(6)
+  user2LastReadAt DateTime?          @map("user2_last_read_at") @db.Timestamptz(6)
+  user1MutedUntil DateTime?          @map("user1_muted_until") @db.Timestamptz(6)
+  user2MutedUntil DateTime?          @map("user2_muted_until") @db.Timestamptz(6)
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
   user1 User  @relation("User1Conversations", fields: [user1Id], references: [id], onDelete: Cascade)
@@ -855,6 +859,7 @@ model Conversation {
 
   @@index([user1Id, lastMessageAt(sort: Desc)])
   @@index([user2Id, lastMessageAt(sort: Desc)])
+  @@index([status])
   @@map("conversations")
 }
 
@@ -900,6 +905,7 @@ model Message {
   sentAt           DateTime              @default(now()) @map("sent_at") @db.Timestamptz(6)
   editedAt         DateTime?             @map("edited_at") @db.Timestamptz(6)
   deletedAt        DateTime?             @map("deleted_at") @db.Timestamptz(6)
+  updatedAt        DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   conversation Conversation   @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User           @relation(fields: [senderId], references: [id], onDelete: Cascade)

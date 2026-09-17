@@ -1,6 +1,7 @@
 import { prisma } from "../config/db.js";
 import { type LoginInput, type RegisterInput } from "../schemas/auth.schema.js";
 import { AppError } from "../utils/app-error.js";
+import { realtimeService } from "./realtime.service.js";
 import { hashPassword, verifyPassword } from "../utils/password.js";
 import { maskPhoneNumber } from "../utils/phone.js";
 import {
@@ -184,6 +185,10 @@ export async function logout(sessionToken: string | undefined): Promise<void> {
 
   const tokenHash = hashSessionToken(sessionToken);
 
+  const session = await prisma.userSession.findUnique({
+    where: { refreshTokenHash: tokenHash }
+  });
+
   await prisma.userSession.updateMany({
     where: {
       refreshTokenHash: tokenHash,
@@ -194,6 +199,10 @@ export async function logout(sessionToken: string | undefined): Promise<void> {
       revokedAt: new Date()
     }
   });
+
+  if (session) {
+    realtimeService.disconnectUserSockets(session.userId, "User logged out");
+  }
 }
 
 export async function logoutAll(userId: string): Promise<void> {
@@ -207,6 +216,8 @@ export async function logoutAll(userId: string): Promise<void> {
       revokedAt: new Date()
     }
   });
+
+  realtimeService.disconnectUserSockets(userId, "All sessions logged out");
 }
 
 export async function verifySession(sessionToken: string | undefined): Promise<{ user: SafeUser; sessionId: string } | null> {

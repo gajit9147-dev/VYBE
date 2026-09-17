@@ -11,6 +11,13 @@
     "apps/*",
     "packages/*"
   ],
+  "scripts": {
+    "dev:api": "npm --prefix apps/api run dev",
+    "dev:web": "npm --prefix apps/web run dev",
+    "build:web": "npm --prefix apps/web run build",
+    "typecheck:web": "npm --prefix apps/web run typecheck",
+    "lint:web": "npm --prefix apps/web run lint"
+  },
   "dependencies": {
     "@node-rs/argon2": "^2.2.1",
     "cookie-parser": "^1.4.7"
