@@ -13,18 +13,18 @@ import { env } from "../config/env.js";
 
 export const emailVerificationRouter = Router();
 
-// Rate limiter for sending verification emails: 5 requests per 15 minutes
+// Rate limiter for sending verification emails: 5 requests per 15 minutes (50 in dev)
 const sendVerificationLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: env.NODE_ENV === "production" ? 5 : 50,
   message: "Too many email verification requests from this IP. Please try again later.",
   keyPrefix: "ev_send"
 });
 
-// Rate limiter for verifying tokens: 20 attempts per 15 minutes (brute-force defense)
+// Rate limiter for verifying tokens: 20 attempts per 15 minutes (100 in dev)
 const verifyTokenLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: env.NODE_ENV === "production" ? 20 : 100,
   message: "Too many verification attempts from this IP. Please try again later.",
   keyPrefix: "ev_verify"
 });
