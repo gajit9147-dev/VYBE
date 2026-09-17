@@ -11,8 +11,8 @@ import { ShellDemoPage } from "@/pages/ShellDemoPage";
 import { DesignSystemPage } from "@/pages/DesignSystemPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ErrorPage } from "@/pages/ErrorPage";
-import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
-import { PublicAuthRoute } from "@/features/auth/components/PublicAuthRoute";
+import { GuestOnlyRoute } from "@/features/auth/components/PublicAuthRoute";
+import { VerifiedRoute } from "@/features/auth/components/VerifiedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -40,7 +40,7 @@ export const router = createBrowserRouter([
         children: [
           // Public auth screens guarded against already-verified authenticated users
           {
-            element: <PublicAuthRoute />,
+            element: <GuestOnlyRoute />,
             children: [
               {
                 path: "login",
@@ -67,9 +67,9 @@ export const router = createBrowserRouter([
       {
         path: "app",
         element: (
-          <ProtectedRoute>
+          <VerifiedRoute>
             <AppLayout />
-          </ProtectedRoute>
+          </VerifiedRoute>
         ),
         children: [
           {

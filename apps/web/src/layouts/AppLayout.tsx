@@ -6,6 +6,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { MobileHeader } from "@/components/layout/MobileHeader";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ContentArea } from "@/components/layout/ContentArea";
+import { UserAccountMenu } from "@/components/layout/UserAccountMenu";
 
 export interface AppLayoutContextValue {
   title: string;
@@ -66,7 +67,7 @@ export const AppLayout: React.FC = () => {
             <MobileHeader
               title={title}
               showBack={showBack}
-              action={headerAction}
+              action={headerAction || <UserAccountMenu variant="header" />}
               showLogo={!showBack}
             />
 

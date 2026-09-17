@@ -61,6 +61,14 @@ class ApiClient {
       }
 
       if (!response.ok) {
+        if (
+          typeof window !== "undefined" &&
+          response.status === 401 &&
+          !path.includes("/auth/login") &&
+          !path.includes("/auth/register")
+        ) {
+          window.dispatchEvent(new CustomEvent("vybe:unauthorized", { detail: { path } }));
+        }
         throw ApiClientError.fromHttp(response.status, responseData ?? undefined);
       }
 

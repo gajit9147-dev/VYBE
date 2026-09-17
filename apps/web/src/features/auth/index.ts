@@ -7,8 +7,12 @@ export * from "./components/VerifyEmailCard";
 export * from "./components/VerifyEmailConfirm";
 export * from "./components/ProtectedRoute";
 export * from "./components/PublicAuthRoute";
+export * from "./components/VerifiedRoute";
+export * from "./components/AuthLoadingScreen";
 export * from "./hooks/useAuth";
+export * from "./hooks/authKeys";
 export * from "./schemas/authSchemas";
 export * from "./types/authTypes";
 export * from "./utils/maskEmail";
+export * from "./utils/safeRedirect";
 

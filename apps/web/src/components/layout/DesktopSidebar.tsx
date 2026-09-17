@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Compass,
   MessageSquareQuote,
@@ -9,17 +8,13 @@ import {
   Sparkles,
   Flame,
   Settings,
-  Layers,
-  LogOut
+  Layers
 } from "lucide-react";
 import { primaryNavigation, secondaryNavigation } from "@/config/navigation";
 import { NavigationItem } from "./NavigationItem";
 import { VYBELogo } from "@/components/ui/VYBELogo";
-import { GlassAvatar } from "@/components/ui/GlassAvatar";
 import { GlassDivider } from "@/components/ui/GlassDivider";
-import { GlassIconButton } from "@/components/ui/GlassIconButton";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useToast } from "@/components/feedback";
+import { UserAccountMenu } from "./UserAccountMenu";
 
 interface DesktopSidebarProps {
   className?: string;
@@ -38,21 +33,6 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ className = "" }) => {
-  const { user, logout, isLoggingOut } = useAuth();
-  const navigate = useNavigate();
-  const toast = useToast();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast.info("You have been signed out.", "Signed Out");
-      navigate("/auth/login", { replace: true });
-    } catch {
-      toast.error("Failed to sign out. Please try again.");
-    }
-  };
-
-  const displayName = user?.email?.split("@")[0] || "User";
 
   return (
     <aside
@@ -99,30 +79,9 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ className = "" }
         </nav>
       </div>
 
-      {/* Bottom Profile Anchor with Logout */}
+      {/* Bottom Profile Anchor with UserAccountMenu */}
       <div className="p-4 border-t border-white/5 bg-slate-950/40">
-        <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-full vybe-glass-capsule">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <GlassAvatar
-              size="sm"
-              fallbackName={displayName}
-              isOnline
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-white truncate capitalize">{displayName}</p>
-              <p className="text-[10px] text-slate-400 truncate">{user?.email || "Member"}</p>
-            </div>
-          </div>
-
-          <GlassIconButton
-            aria-label="Log out of account"
-            icon={<LogOut className="w-3.5 h-3.5 text-slate-400 hover:text-rose-400 transition-colors" />}
-            size="sm"
-            variant="ghost"
-            disabled={isLoggingOut}
-            onClick={handleLogout}
-          />
-        </div>
+        <UserAccountMenu variant="sidebar" />
       </div>
     </aside>
   );

@@ -2,6 +2,7 @@ import { api } from "@/services/api/client";
 import {
   AuthResponse,
   LogoutResponse,
+  LogoutAllResponse,
   SendVerificationResponse,
   VerificationStatusResponse,
   VerifyEmailResponse
@@ -29,6 +30,10 @@ export const authApi = {
 
   logout: async (): Promise<LogoutResponse> => {
     return api.post<LogoutResponse>("/api/auth/logout");
+  },
+
+  logoutAll: async (): Promise<LogoutAllResponse> => {
+    return api.post<LogoutAllResponse>("/api/auth/logout-all");
   },
 
   sendVerification: async (email?: string): Promise<SendVerificationResponse> => {

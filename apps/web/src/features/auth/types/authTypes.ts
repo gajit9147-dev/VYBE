@@ -34,3 +34,14 @@ export interface VerificationStatusResponse {
   verifiedAt: string | null;
 }
 
+export type AuthStatus =
+  | "AUTH_LOADING"
+  | "AUTHENTICATED_UNVERIFIED"
+  | "AUTHENTICATED_VERIFIED"
+  | "UNAUTHENTICATED"
+  | "AUTH_ERROR";
+
+export interface LogoutAllResponse {
+  message: string;
+}
+
