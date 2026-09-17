@@ -1,5 +1,11 @@
 import { api } from "@/services/api/client";
-import { AuthResponse, LogoutResponse } from "../types/authTypes";
+import {
+  AuthResponse,
+  LogoutResponse,
+  SendVerificationResponse,
+  VerificationStatusResponse,
+  VerifyEmailResponse
+} from "../types/authTypes";
 import { LoginFormData, RegisterFormData } from "../schemas/authSchemas";
 
 export const authApi = {
@@ -23,5 +29,22 @@ export const authApi = {
 
   logout: async (): Promise<LogoutResponse> => {
     return api.post<LogoutResponse>("/api/auth/logout");
+  },
+
+  sendVerification: async (email?: string): Promise<SendVerificationResponse> => {
+    return api.post<SendVerificationResponse>("/api/auth/email-verification/send", {
+      email: email ? email.trim().toLowerCase() : undefined
+    });
+  },
+
+  verifyEmail: async (token: string): Promise<VerifyEmailResponse> => {
+    return api.get<VerifyEmailResponse>(`/api/auth/email-verification/verify?token=${encodeURIComponent(token.trim())}`);
+  },
+
+  getVerificationStatus: async (email?: string): Promise<VerificationStatusResponse> => {
+    return api.get<VerificationStatusResponse>("/api/auth/email-verification/status", {
+      params: email ? { email: email.trim().toLowerCase() } : undefined
+    });
   }
 };
+

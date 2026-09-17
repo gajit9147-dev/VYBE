@@ -54,9 +54,18 @@ export const LoginForm: React.FC = () => {
     }
 
     try {
-      await login(validation.data);
+      const res = await login(validation.data);
 
       toast.success("Welcome back to VYBE.", "Signed In");
+
+      // If user has not verified their email, direct them to verification flow
+      if (!res.user.isVerified) {
+        navigate("/auth/verify-email", {
+          replace: true,
+          state: { email: validation.data.email }
+        });
+        return;
+      }
 
       // Redirect to intended page or default /app
       const rawRedirect = searchParams.get("redirect");

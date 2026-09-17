@@ -55,6 +55,39 @@ export function useLogout() {
   });
 }
 
+export function useEmailVerificationStatus(email?: string) {
+  return useQuery({
+    queryKey: ["auth", "email-verification", "status", email ?? "me"] as const,
+    queryFn: async () => {
+      try {
+        return await authApi.getVerificationStatus(email);
+      } catch {
+        return null;
+      }
+    },
+    staleTime: 1000 * 30, // 30 seconds
+    retry: false
+  });
+}
+
+export function useSendVerificationEmail() {
+  return useMutation({
+    mutationFn: (email?: string) => authApi.sendVerification(email)
+  });
+}
+
+export function useVerifyEmailToken() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (token: string) => authApi.verifyEmail(token),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["auth", "email-verification"] });
+    }
+  });
+}
+
 export function useAuth() {
   const { data: user, isLoading, isError, refetch } = useCurrentUser();
   const loginMutation = useLogin();
@@ -64,6 +97,7 @@ export function useAuth() {
   return {
     user: (user as SafeUser | null) ?? null,
     isAuthenticated: Boolean(user),
+    isVerified: Boolean(user?.isVerified),
     isLoading,
     isError,
     refetchUser: refetch,
@@ -75,3 +109,4 @@ export function useAuth() {
     isLoggingOut: logoutMutation.isPending
   };
 }
+

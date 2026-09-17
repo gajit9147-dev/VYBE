@@ -5,10 +5,14 @@ import { PageLoading } from "@/components/feedback/PageLoading";
 
 export interface ProtectedRouteProps {
   children?: React.ReactNode;
+  requireVerified?: boolean;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requireVerified = true
+}) => {
+  const { user, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -19,6 +23,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     // Preserve intended destination path in search params
     const redirectPath = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/auth/login?redirect=${redirectPath}`} replace />;
+  }
+
+  if (requireVerified && user && !user.isVerified) {
+    return <Navigate to="/auth/verify-email" replace />;
   }
 
   return children ? <>{children}</> : <Outlet />;

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Mail, AlertCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { authApi } from "../api/authApi";
 import { registerSchema, RegisterFormData } from "../schemas/authSchemas";
 import { PasswordField } from "./PasswordField";
 import { GlassInput } from "@/components/ui/GlassInput";
@@ -54,12 +55,28 @@ export const RegisterForm: React.FC = () => {
     }
 
     try {
-      await register({
+      const response = await register({
         email: validation.data.email,
         password: validation.data.password
       });
 
-      toast.success("Account created successfully. Welcome to VYBE!", "Account Created");
+      // Automatically dispatch verification email on successful registration
+      try {
+        await authApi.sendVerification(validation.data.email);
+      } catch {
+        // Silently ignore if rate limited or dispatched; verify page handles resend
+      }
+
+      toast.success("Account created successfully. Please verify your email.", "Account Created");
+
+      // Check if user is verified; if unverified, route to email verification
+      if (!response.user.isVerified) {
+        navigate("/auth/verify-email", {
+          replace: true,
+          state: { email: validation.data.email }
+        });
+        return;
+      }
 
       const rawRedirect = searchParams.get("redirect");
       const destination =

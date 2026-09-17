@@ -5,6 +5,7 @@ import { AppLayout } from "@/layouts/AppLayout";
 import { LandingPage } from "@/pages/LandingPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
+import { VerifyEmailPage } from "@/pages/VerifyEmailPage";
 import { AppHomePage } from "@/pages/AppHomePage";
 import { ShellDemoPage } from "@/pages/ShellDemoPage";
 import { DesignSystemPage } from "@/pages/DesignSystemPage";
@@ -32,22 +33,33 @@ export const router = createBrowserRouter([
           }
         ]
       },
-      // Auth Route Tier (protected against already-authenticated users)
+      // Auth Route Tier
       {
         path: "auth",
-        element: (
-          <PublicAuthRoute>
-            <AuthLayout />
-          </PublicAuthRoute>
-        ),
+        element: <AuthLayout />,
         children: [
+          // Public auth screens guarded against already-verified authenticated users
           {
-            path: "login",
-            element: <LoginPage />
+            element: <PublicAuthRoute />,
+            children: [
+              {
+                path: "login",
+                element: <LoginPage />
+              },
+              {
+                path: "register",
+                element: <RegisterPage />
+              }
+            ]
+          },
+          // Email Verification screens (handles unverified users and token confirmation)
+          {
+            path: "verify-email",
+            element: <VerifyEmailPage />
           },
           {
-            path: "register",
-            element: <RegisterPage />
+            path: "verify-email/confirm",
+            element: <VerifyEmailPage />
           }
         ]
       },

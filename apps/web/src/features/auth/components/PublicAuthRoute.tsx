@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { PageLoading } from "@/components/feedback/PageLoading";
 
 export const PublicAuthRoute: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [searchParams] = useSearchParams();
 
   if (isLoading) {
@@ -12,6 +12,10 @@ export const PublicAuthRoute: React.FC<{ children?: React.ReactNode }> = ({ chil
   }
 
   if (isAuthenticated) {
+    if (user && !user.isVerified) {
+      return <Navigate to="/auth/verify-email" replace />;
+    }
+
     const rawRedirect = searchParams.get("redirect");
     // Ensure redirect is an internal app path to prevent open redirect vulnerabilities
     const redirectUrl =
