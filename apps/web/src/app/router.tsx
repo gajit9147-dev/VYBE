@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { PublicLayout } from "@/layouts/PublicLayout";
 import { AuthLayout } from "@/layouts/AuthLayout";
 import { AppLayout } from "@/layouts/AppLayout";
-import { LandingPage } from "@/pages/LandingPage";
+import { WelcomePage } from "@/features/landing";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { VerifyEmailPage } from "@/pages/VerifyEmailPage";
@@ -25,7 +25,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <LandingPage />
+            element: <WelcomePage />
           },
           {
             path: "design-system",
