@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Mail, AlertCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { loginSchema, LoginFormData } from "../schemas/authSchemas";
+import { getSafeRedirectUrl } from "../utils/safeRedirect";
 import { PasswordField } from "./PasswordField";
 import { GlassInput } from "@/components/ui/GlassInput";
 import { GlassButton } from "@/components/ui/GlassButton";
@@ -36,11 +37,22 @@ export const LoginForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Guard against duplicate submissions
+    if (isLoggingIn) return;
+
     setFormError(null);
     setFieldErrors({});
 
+    // Normalize email consistently with registration flow
+    const normalizedEmail = formData.email.trim().toLowerCase();
+
     // Client-side Zod validation
-    const validation = loginSchema.safeParse(formData);
+    const validation = loginSchema.safeParse({
+      email: normalizedEmail,
+      password: formData.password
+    });
+
     if (!validation.success) {
       const errors: Partial<Record<keyof LoginFormData, string>> = {};
       validation.error.issues.forEach((issue) => {
@@ -62,33 +74,39 @@ export const LoginForm: React.FC = () => {
       if (!res.user.isVerified) {
         navigate("/auth/verify-email", {
           replace: true,
-          state: { email: validation.data.email }
+          state: { email: normalizedEmail }
         });
         return;
       }
 
-      // Redirect to intended page or default /app
-      const rawRedirect = searchParams.get("redirect");
-      const destination =
-        rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
-          ? decodeURIComponent(rawRedirect)
-          : "/app";
-
+      // Safe intended destination restoration (prevents open redirects)
+      const destination = getSafeRedirectUrl(searchParams.get("redirect"), "/app");
       navigate(destination, { replace: true });
     } catch (err: unknown) {
       if (err instanceof ApiClientError) {
         if (err.status === 401) {
+          // Safe generic message — never reveals whether email exists or password was wrong
           setFormError("Email or password is incorrect.");
+        } else if (err.status === 423) {
+          setFormError("Account is temporarily locked due to excessive failed attempts. Please try again later.");
         } else if (err.status === 429) {
-          setFormError("Too many attempts. Please wait a moment before trying again.");
+          setFormError("Too many sign-in attempts. Please wait and try again.");
+        } else if (err.status && err.status >= 500) {
+          setFormError("Something went wrong on our side. Please try again.");
         } else {
           setFormError(err.message || "Unable to sign in. Please try again.");
         }
       } else {
-        setFormError("We couldn't connect to the server. Please check your connection.");
+        // Network failure / offline
+        setFormError("We couldn't connect right now. Please try again.");
       }
     }
   };
+
+  const registerRedirect = searchParams.get("redirect");
+  const registerLink = registerRedirect
+    ? `/auth/register?redirect=${encodeURIComponent(registerRedirect)}`
+    : "/auth/register";
 
   return (
     <GlassCard variant="strong" padding="lg" className="w-full">
@@ -96,10 +114,10 @@ export const LoginForm: React.FC = () => {
         {formError && (
           <div
             role="alert"
-            aria-live="assertive"
-            className="flex items-start gap-2.5 p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs"
+            aria-live="polite"
+            className="flex items-start gap-2.5 p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs shadow-sm"
           >
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" aria-hidden="true" />
             <p className="leading-relaxed">{formError}</p>
           </div>
         )}
@@ -130,12 +148,13 @@ export const LoginForm: React.FC = () => {
           />
 
           <div className="flex justify-end mt-1.5">
-            <span
-              className="text-xs text-slate-400 hover:text-slate-200 transition-colors cursor-pointer select-none"
-              onClick={() => toast.info("Password reset will be enabled in an upcoming step.", "Password Recovery")}
+            <button
+              type="button"
+              className="text-xs text-slate-400 hover:text-slate-200 transition-colors select-none focus-visible:ring-1 focus-visible:ring-pink-500 rounded outline-none"
+              onClick={() => toast.info("Password recovery will be available soon.", "Password Recovery")}
             >
               Forgot password?
-            </span>
+            </button>
           </div>
         </div>
 
@@ -147,14 +166,14 @@ export const LoginForm: React.FC = () => {
           isLoading={isLoggingIn}
           className="mt-2"
         >
-          {isLoggingIn ? "Signing In..." : "Sign In"}
+          {isLoggingIn ? "Signing in..." : "Sign In"}
         </GlassButton>
 
         <p className="text-center text-xs text-slate-400 pt-2">
           Don&apos;t have an account?{" "}
           <Link
-            to={`/auth/register${searchParams.toString() ? `?${searchParams.toString()}` : ""}`}
-            className="text-pink-400 font-semibold hover:text-pink-300 hover:underline transition-colors"
+            to={registerLink}
+            className="text-pink-400 font-semibold hover:text-pink-300 hover:underline transition-colors focus-visible:ring-1 focus-visible:ring-pink-500 rounded outline-none"
           >
             Create account
           </Link>
