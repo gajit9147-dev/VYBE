@@ -18,6 +18,19 @@ export class InMemoryEmailProvider implements EmailProvider {
   async send(options: SendEmailOptions): Promise<void> {
     this.sentEmails.push(options);
     logger.info({ to: options.to, subject: options.subject }, "Email sent via InMemoryEmailProvider");
+
+    // In development mode, print the verification link clearly in the server console
+    if (env.NODE_ENV !== "production") {
+      console.log("\n=======================================================");
+      console.log(`📨 [LOCAL DEV EMAIL DISPATCHED]`);
+      console.log(`To: ${options.to}`);
+      console.log(`Subject: ${options.subject}`);
+      const linkMatch = options.text.match(/https?:\/\/[^\s]+/);
+      if (linkMatch) {
+        console.log(`🔗 Click to verify:\n   ${linkMatch[0]}`);
+      }
+      console.log("=======================================================\n");
+    }
   }
 
   getSentEmails(): SendEmailOptions[] {

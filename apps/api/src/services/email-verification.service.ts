@@ -92,8 +92,9 @@ export async function sendVerificationEmail(options: {
     }
   });
 
-  // Construct verification URL without hardcoding production host
-  const verificationUrl = `${env.APP_BASE_URL}/api/auth/email-verification/verify?token=${encodeURIComponent(rawToken)}`;
+  // Construct verification URL pointing to the web frontend
+  const webBaseUrl = env.CORS_ORIGIN || "http://localhost:3000";
+  const verificationUrl = `${webBaseUrl}/auth/verify-email?token=${encodeURIComponent(rawToken)}`;
   const emailContent = createVerificationEmailTemplate(verificationUrl, expiresInHours);
 
   // Dispatch email (raw token never logged)

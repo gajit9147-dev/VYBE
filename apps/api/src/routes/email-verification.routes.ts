@@ -8,6 +8,8 @@ import {
 import { optionalAuthenticate } from "../middleware/authenticate.js";
 import { createRateLimiter } from "../middleware/rate-limiter.js";
 import { validateBody } from "../middleware/validate.js";
+import { emailProvider } from "../services/email/email.provider.js";
+import { env } from "../config/env.js";
 
 export const emailVerificationRouter = Router();
 
@@ -50,3 +52,25 @@ emailVerificationRouter.get(
   optionalAuthenticate,
   handleGetVerificationStatus
 );
+
+if (env.NODE_ENV !== "production") {
+  emailVerificationRouter.get(
+    "/dev-latest-link",
+    optionalAuthenticate,
+    (req, res) => {
+      const email = req.user?.email || (typeof req.query.email === "string" ? req.query.email : undefined);
+      const lastEmail = emailProvider.getLastEmail();
+      if (lastEmail && (!email || lastEmail.to.toLowerCase() === email.toLowerCase())) {
+        const match = lastEmail.text.match(/https?:\/\/[^\s]+/);
+        res.json({
+          found: true,
+          to: lastEmail.to,
+          verificationUrl: match ? match[0] : null
+        });
+      } else {
+        res.json({ found: false });
+      }
+    }
+  );
+}
+

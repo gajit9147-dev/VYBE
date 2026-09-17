@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, CheckCircle, RefreshCw, AlertCircle, LogOut } from "lucide-react";
+import { Mail, CheckCircle, RefreshCw, AlertCircle, LogOut, Sparkles, ExternalLink } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { AuthHeader } from "./AuthHeader";
@@ -32,6 +32,28 @@ export const VerifyEmailCard: React.FC<VerifyEmailCardProps> = ({ initialEmail }
   const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [devLink, setDevLink] = useState<string | null>(null);
+
+  // In development mode, check if the in-memory provider has the latest link
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    async function fetchDevLink() {
+      try {
+        const res = await fetch("http://localhost:4000/api/auth/email-verification/dev-latest-link", {
+          credentials: "include"
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.found && data.verificationUrl) {
+            setDevLink(data.verificationUrl);
+          }
+        }
+      } catch {
+        // Silently ignore
+      }
+    }
+    fetchDevLink();
+  }, [successMessage, userEmail]);
 
   // If status query or user shows verified, automatically navigate to /app
   useEffect(() => {
@@ -149,6 +171,26 @@ export const VerifyEmailCard: React.FC<VerifyEmailCardProps> = ({ initialEmail }
           >
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
             <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {/* Development Mode Helper Banner */}
+        {import.meta.env.DEV && devLink && (
+          <div className="w-full p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-col items-start gap-2 text-left text-xs">
+            <div className="flex items-center gap-2 text-amber-400 font-semibold">
+              <Sparkles className="w-4 h-4 shrink-0" />
+              <span>Dev Mode: Simulated Email Captured</span>
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              No live SMTP service is configured in <code>apps/api/.env</code>. Your verification link was captured by the in-memory provider:
+            </p>
+            <a
+              href={devLink}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-xs font-medium transition-colors"
+            >
+              <span>Click to complete email verification</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
           </div>
         )}
 
