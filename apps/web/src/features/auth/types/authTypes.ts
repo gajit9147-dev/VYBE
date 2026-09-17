@@ -20,7 +20,23 @@ export interface LogoutResponse {
 export interface SendVerificationResponse {
   message: string;
 }
+export interface SendPhoneOtpResponse {
+  message: string;
+  phoneNumber: string | null;
+}
 
+export interface VerifyPhoneOtpResponse {
+  message: string;
+  phoneNumber: string | null;
+  isPhoneVerified: boolean;
+  phoneVerifiedAt: string;
+}
+
+export interface PhoneStatusResponse {
+  isPhoneVerified: boolean;
+  phoneNumber: string | null;
+  phoneVerifiedAt: string | null;
+}
 export interface VerifyEmailResponse {
   message: string;
   email: string | null;

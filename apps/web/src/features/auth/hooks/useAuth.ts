@@ -1,7 +1,16 @@
 import { useEffect } from "react";
-import { useQuery, useMutation, useQueryClient, QueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+} from "@tanstack/react-query";
 import { authApi } from "../api/authApi";
 import { LoginFormData, RegisterFormData } from "../schemas/authSchemas";
+import {
+  PhoneOtpVerificationFormData,
+  PhoneVerificationFormData,
+} from "../schemas/phoneSchemas";
 import { SafeUser, AuthStatus } from "../types/authTypes";
 import { authKeys } from "./authKeys";
 import { ApiClientError } from "@/services/api/errors";
@@ -49,7 +58,7 @@ export function useCurrentUser() {
         return false;
       }
       return failureCount < 2;
-    }
+    },
   });
 }
 
@@ -61,7 +70,7 @@ export function useLogin() {
     onSuccess: (response) => {
       clearAuthSession(queryClient);
       queryClient.setQueryData(authKeys.currentUser(), response.user);
-    }
+    },
   });
 }
 
@@ -69,11 +78,12 @@ export function useRegister() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Omit<RegisterFormData, "confirmPassword">) => authApi.register(data),
+    mutationFn: (data: Omit<RegisterFormData, "confirmPassword">) =>
+      authApi.register(data),
     onSuccess: (response) => {
       clearAuthSession(queryClient);
       queryClient.setQueryData(authKeys.currentUser(), response.user);
-    }
+    },
   });
 }
 
@@ -84,7 +94,7 @@ export function useLogout() {
     mutationFn: () => authApi.logout(),
     onSuccess: () => {
       clearAuthSession(queryClient);
-    }
+    },
   });
 }
 
@@ -95,7 +105,7 @@ export function useLogoutAll() {
     mutationFn: () => authApi.logoutAll(),
     onSuccess: () => {
       clearAuthSession(queryClient);
-    }
+    },
   });
 }
 
@@ -110,13 +120,13 @@ export function useEmailVerificationStatus(email?: string) {
       }
     },
     staleTime: 1000 * 30, // 30 seconds
-    retry: false
+    retry: false,
   });
 }
 
 export function useSendVerificationEmail() {
   return useMutation({
-    mutationFn: (email?: string) => authApi.sendVerification(email)
+    mutationFn: (email?: string) => authApi.sendVerification(email),
   });
 }
 
@@ -126,24 +136,72 @@ export function useVerifyEmailToken() {
   return useMutation({
     mutationFn: (token: string) => authApi.verifyEmail(token),
     onSuccess: (result) => {
-      queryClient.setQueryData(authKeys.currentUser(), (old: SafeUser | null | undefined) => {
-        if (!old) return old;
-        return {
-          ...old,
-          isVerified: true,
-          emailVerifiedAt: result.verifiedAt || new Date().toISOString()
-        };
-      });
+      queryClient.setQueryData(
+        authKeys.currentUser(),
+        (old: SafeUser | null | undefined) => {
+          if (!old) return old;
+          return {
+            ...old,
+            isVerified: true,
+            emailVerifiedAt: result.verifiedAt || new Date().toISOString(),
+          };
+        },
+      );
       queryClient.invalidateQueries({ queryKey: authKeys.currentUser() });
       queryClient.invalidateQueries({ queryKey: authKeys.verification() });
-    }
+    },
+  });
+}
+
+export function usePhoneStatus() {
+  const { data: user } = useCurrentUser();
+
+  return useQuery({
+    queryKey: authKeys.phoneStatus(),
+    queryFn: async () => {
+      try {
+        return await authApi.getPhoneStatus();
+      } catch {
+        return null;
+      }
+    },
+    enabled: Boolean(user),
+    staleTime: 1000 * 30,
+    retry: false,
+  });
+}
+
+export function useSendPhoneOtp() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ phoneNumber }: PhoneVerificationFormData) =>
+      authApi.sendPhoneOtp(phoneNumber),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: authKeys.phoneStatus() });
+    },
+  });
+}
+
+export function useVerifyPhoneOtp() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ phoneNumber, otp }: PhoneOtpVerificationFormData) =>
+      authApi.verifyPhoneOtp(phoneNumber, otp),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: authKeys.currentUser() });
+      queryClient.invalidateQueries({ queryKey: authKeys.phoneStatus() });
+    },
   });
 }
 
 export function useAuth() {
   const queryClient = useQueryClient();
   const { data: user, isLoading, isError, error, refetch } = useCurrentUser();
-  const { data: verificationStatus } = useEmailVerificationStatus(user?.email || undefined);
+  const { data: verificationStatus } = useEmailVerificationStatus(
+    user?.email || undefined,
+  );
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const logoutMutation = useLogout();
@@ -161,7 +219,9 @@ export function useAuth() {
     };
   }, [queryClient]);
 
-  const isVerified = Boolean(user?.isVerified || verificationStatus?.isVerified);
+  const isVerified = Boolean(
+    user?.isVerified || verificationStatus?.isVerified,
+  );
 
   // Derive explicit 5-state auth status model
   let authStatus: AuthStatus = "AUTH_LOADING";
@@ -170,7 +230,9 @@ export function useAuth() {
   } else if (isError) {
     authStatus = "AUTH_ERROR";
   } else if (user) {
-    authStatus = isVerified ? "AUTHENTICATED_VERIFIED" : "AUTHENTICATED_UNVERIFIED";
+    authStatus = isVerified
+      ? "AUTHENTICATED_VERIFIED"
+      : "AUTHENTICATED_UNVERIFIED";
   } else {
     authStatus = "UNAUTHENTICATED";
   }
@@ -191,7 +253,7 @@ export function useAuth() {
     logout: logoutMutation.mutateAsync,
     isLoggingOut: logoutMutation.isPending,
     logoutAll: logoutAllMutation.mutateAsync,
-    isLoggingOutAll: logoutAllMutation.isPending
+    isLoggingOutAll: logoutAllMutation.isPending,
   };
 }
 export { authKeys };
